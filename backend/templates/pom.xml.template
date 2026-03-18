@@ -1,0 +1,249 @@
+# ============================================================================
+# Maven POM.xml 模板文件
+# 用于 OSPdistribute 微服务项目
+# 
+# 使用说明：
+# 1. 复制此模板到需要配置的服务目录下
+# 2. 重命名为 pom.xml
+# 3. 修改 artifactId、name 和 description 为对应服务的信息
+# 4. 根据需要添加或移除依赖
+# ============================================================================
+
+# 基础微服务模板（适用于 user-service, product-service, order-service 等）
+# ============================================================================
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
+         http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    
+    <!-- 父项目引用（必须） -->
+    <parent>
+        <groupId>com.epsilon</groupId>
+        <artifactId>OSPdistribute</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+        <relativePath>../../pom.xml</relativePath>
+    </parent>
+    
+    <!-- 服务基本信息（必须修改） -->
+    <artifactId>{service-name}</artifactId>
+    <packaging>jar</packaging>
+    <name>{service-name}</name>
+    <description>{服务描述}</description>
+    
+    <!-- 依赖管理 -->
+    <dependencies>
+        <!-- ==================== 基础依赖（所有微服务都需要） ==================== -->
+        
+        <!-- Spring Boot Web 基础（需要 Web 功能时添加） -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        
+        <!-- Eureka 客户端 - 服务注册与发现（所有微服务都需要） -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+        </dependency>
+        
+        <!-- Config 客户端 - 配置中心（所有微服务都需要） -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-config</artifactId>
+        </dependency>
+        
+        <!-- Bootstrap 支持（使用 Config 时需要） -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-bootstrap</artifactId>
+        </dependency>
+        
+        <!-- ==================== 数据库相关（按需添加） ==================== -->
+        
+        <!-- MySQL 驱动（需要数据库时添加） -->
+        <dependency>
+            <groupId>com.mysql</groupId>
+            <artifactId>mysql-connector-j</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        
+        <!-- MyBatis-Plus（使用 MyBatis 时添加） -->
+        <dependency>
+            <groupId>com.baomidou</groupId>
+            <artifactId>mybatis-plus-boot-starter</artifactId>
+        </dependency>
+        
+        <!-- ==================== 中间件（按需添加） ==================== -->
+        
+        <!-- Redis 缓存（需要缓存时添加） -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+        </dependency>
+        
+        <!-- Kafka 消息队列（需要消息队列时添加） -->
+        <dependency>
+            <groupId>org.springframework.kafka</groupId>
+            <artifactId>spring-kafka</artifactId>
+        </dependency>
+        
+        <!-- ==================== 工具类（按需添加） ==================== -->
+        
+        <!-- JWT（需要 Token 认证时添加） -->
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-impl</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-jackson</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        
+        <!-- Lombok（简化代码，推荐所有服务添加） -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <optional>true</optional>
+        </dependency>
+        
+        <!-- ==================== 测试依赖（按需添加） ==================== -->
+        
+        <!-- Spring Boot 测试 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+    
+    <!-- 构建配置 -->
+    <build>
+        <plugins>
+            <!-- Spring Boot Maven 插件（必须） -->
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                        </exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
+
+# ============================================================================
+# 各服务依赖配置参考
+# ============================================================================
+
+# 1. user-service (用户服务)
+#    - 基础依赖 + MySQL + MyBatis-Plus + JWT + Lombok
+#    - 不需要 Redis 和 Kafka
+
+# 2. product-service (商品服务)
+#    - 基础依赖 + MySQL + MyBatis-Plus + Redis + Kafka + Lombok
+#    - 需要 Redis 缓存商品信息，Kafka 处理库存变更
+
+# 3. order-service (订单服务)
+#    - 基础依赖 + MySQL + MyBatis-Plus + Redis + Kafka + Lombok
+#    - 需要 Redis 缓存订单，Kafka 处理订单流程
+
+# 4. payment-service (支付服务)
+#    - 基础依赖 + MySQL + MyBatis-Plus + Kafka + Lombok
+#    - 需要 Kafka 处理支付回调
+
+# 5. shipment-service (物流服务)
+#    - 基础依赖 + MySQL + MyBatis-Plus + Kafka + Lombok
+#    - 需要 Kafka 接收订单发货消息
+
+# 6. comment-service (评论服务)
+#    - 基础依赖 + MySQL + MyBatis-Plus + Redis + Lombok
+#    - 需要 Redis 缓存评论数据
+
+# 7. blog-service (博客服务)
+#    - 基础依赖 + MySQL + MyBatis-Plus + Redis + Lombok
+#    - 需要 Redis 缓存博客文章
+
+# 8. store-service (店铺服务)
+#    - 基础依赖 + MySQL + MyBatis-Plus + Redis + Lombok
+#    - 需要 Redis 缓存店铺信息
+
+# 9. sms-service (短信服务)
+#    - 基础依赖 + Kafka + Lombok
+#    - 不需要数据库，只需要 Kafka 接收短信发送请求
+
+# 10. stats-service (统计服务)
+#     - 基础依赖 + MySQL + MyBatis-Plus + Redis + Kafka + Lombok
+#     - 需要 Kafka 接收各服务统计数据
+
+# 11. eureka-server (服务注册中心)
+#     - 只需要 Eureka Server 依赖
+#     示例：
+#     <dependency>
+#         <groupId>org.springframework.cloud</groupId>
+#         <artifactId>spring-cloud-starter-netflix-eureka-server</artifactId>
+#     </dependency>
+
+# 12. config-server (配置中心)
+#     - 只需要 Config Server 依赖
+#     示例：
+#     <dependency>
+#         <groupId>org.springframework.cloud</groupId>
+#         <artifactId>spring-cloud-config-server</artifactId>
+#     </dependency>
+
+# ============================================================================
+# 常见依赖说明
+# ============================================================================
+
+# Spring Boot 核心依赖：
+# - spring-boot-starter-web: Web 服务基础（Tomcat, Spring MVC）
+# - spring-boot-starter-security: 安全框架（认证、授权）
+# - spring-boot-starter-validation: 参数校验
+# - spring-boot-starter-data-redis: Redis 缓存
+# - spring-boot-starter-data-elasticsearch: Elasticsearch 搜索
+
+# Spring Cloud 微服务依赖：
+# - spring-cloud-starter-netflix-eureka-client: Eureka 客户端
+# - spring-cloud-starter-config: 配置中心客户端
+# - spring-cloud-starter-bootstrap: Bootstrap 配置支持
+# - spring-cloud-starter-openfeign: Feign 服务调用
+# - spring-cloud-starter-gateway: API 网关
+
+# 数据库相关：
+# - mysql-connector-j: MySQL 驱动
+# - mybatis-plus-boot-starter: MyBatis-Plus ORM
+# - spring-boot-starter-data-jpa: JPA ORM
+
+# 消息队列：
+# - spring-kafka: Kafka 消息队列
+
+# 工具类：
+# - lombok: 简化 Java 代码
+# - jjwt-*: JWT Token 处理
+# - hutool-all: Java 工具类库
+
+# ============================================================================
+# 注意事项
+# ============================================================================
+# 1. 所有依赖的版本号由父 pom.xml 统一管理，子模块不需要指定版本
+# 2. 父 pom.xml 中已经声明的依赖，子模块只需添加 groupId 和 artifactId
+# 3. 避免在子模块中重复声明父 pom 已管理的依赖版本
+# 4. 使用 scope 标记依赖范围：
+#    - compile（默认）：编译和运行时都需要
+#    - runtime：仅运行时需要（如数据库驱动）
+#    - provided：由外部容器提供（如 Tomcat）
+#    - test：仅测试时需要
+# 5. optional=true 表示依赖不会被传递到其他引用此模块的项目
