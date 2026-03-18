@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>博客列表 - OSP商城</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* 博客列表页特有样式 */
+        .blog-page {
+            padding: 30px 0;
+        }
+        
+        .blog-container {
+            display: flex;
+            gap: 30px;
+        }
+        
+        .blog-sidebar {
+            width: 250px;
+            flex-shrink: 0;
+        }
+        
+        .sidebar-section {
+            background-color: #f5f5f5;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .sidebar-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .category-list {
+            list-style: none;
+        }
+        
+        .category-list li {
+            margin-bottom: 10px;
+        }
+        
+        .category-list a {
+            text-decoration: none;
+            color: #666;
+            transition: color 0.3s;
+        }
+        
+        .category-list a:hover {
+            color: #ff6b6b;
+        }
+        
+        .tag-cloud {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .tag {
+            padding: 5px 15px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            font-size: 14px;
+            color: #666;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+        
+        .tag:hover {
+            background-color: #ff6b6b;
+            color: #fff;
+            border-color: #ff6b6b;
+        }
+        
+        .recent-posts {
+            list-style: none;
+        }
+        
+        .recent-posts li {
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .recent-posts li:last-child {
+            border-bottom: none;
+        }
+        
+        .recent-posts a {
+            text-decoration: none;
+            color: #333;
+            font-size: 14px;
+            transition: color 0.3s;
+        }
+        
+        .recent-posts a:hover {
+            color: #ff6b6b;
+        }
+        
+        .recent-posts .post-date {
+            font-size: 12px;
+            color: #999;
+            margin-top: 5px;
+        }
+        
+        .blog-content {
+            flex: 1;
+        }
+        
+        .blog-header {
+            margin-bottom: 30px;
+        }
+        
+        .blog-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        
+        .blog-sort {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .sort-options {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .sort-option {
+            cursor: pointer;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .sort-option.active {
+            color: #ff6b6b;
+            font-weight: bold;
+        }
+        
+        .blog-list {
+            margin-bottom: 30px;
+        }
+        
+        .blog-post {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px;
+            padding-bottom: 30px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .blog-post:last-child {
+            border-bottom: none;
+        }
+        
+        .post-image {
+            width: 200px;
+            height: 150px;
+            flex-shrink: 0;
+        }
+        
+        .post-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+        
+        .post-content {
+            flex: 1;
+        }
+        
+        .post-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .post-title a {
+            text-decoration: none;
+            color: #333;
+            transition: color 0.3s;
+        }
+        
+        .post-title a:hover {
+            color: #ff6b6b;
+        }
+        
+        .post-excerpt {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.5;
+            margin-bottom: 15px;
+        }
+        
+        .post-meta {
+            display: flex;
+            gap: 15px;
+            font-size: 12px;
+            color: #999;
+        }
+        
+        .post-meta span {
+            display: flex;
+            align-items: center;
+        }
+        
+        .post-meta i {
+            margin-right: 5px;
+        }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .page-item {
+            padding: 5px 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .page-item.active {
+            background-color: #ff6b6b;
+            color: #fff;
+            border-color: #ff6b6b;
+        }
+        
+        .page-item.disabled {
+            color: #999;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="logo">
+                <a href="index.html">OSP商城</a>
+            </div>
+            <ul class="nav-links">
+                <li><a href="index.html">首页</a></li>
+                <li><a href="products.html">商品</a></li>
+                <li><a href="stores.html">店铺</a></li>
+                <li><a href="blog.html" style="color: #ff6b6b;">博客</a></li>
+                <li><a href="cart.html">购物车</a></li>
+                <li><a href="user.html">个人中心</a></li>
+            </ul>
+            <div class="search-box">
+                <input type="text" placeholder="搜索商品">
+                <button>搜索</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 博客列表页面 -->
+    <div class="blog-page">
+        <div class="container">
+            <div class="blog-container">
+                <!-- 侧边栏 -->
+                <div class="blog-sidebar">
+                    <!-- 分类 -->
+                    <div class="sidebar-section">
+                        <h3 class="sidebar-title">博客分类</h3>
+                        <ul class="category-list">
+                            <li><a href="#">科技</a></li>
+                            <li><a href="#">时尚</a></li>
+                            <li><a href="#">生活</a></li>
+                            <li><a href="#">美食</a></li>
+                            <li><a href="#">旅游</a></li>
+                        </ul>
+                    </div>
+                    
+                    <!-- 标签云 -->
+                    <div class="sidebar-section">
+                        <h3 class="sidebar-title">标签云</h3>
+                        <div class="tag-cloud">
+                            <a href="#" class="tag">智能手机</a>
+                            <a href="#" class="tag">时尚穿搭</a>
+                            <a href="#" class="tag">家电选购</a>
+                            <a href="#" class="tag">美食推荐</a>
+                            <a href="#" class="tag">旅行攻略</a>
+                            <a href="#" class="tag">健身指南</a>
+                            <a href="#" class="tag">数码产品</a>
+                            <a href="#" class="tag">护肤美妆</a>
+                        </div>
+                    </div>
+                    
+                    <!-- 最新文章 -->
+                    <div class="sidebar-section">
+                        <h3 class="sidebar-title">最新文章</h3>
+                        <ul class="recent-posts">
+                            <li>
+                                <a href="#">2024年最值得购买的智能手机推荐</a>
+                                <div class="post-date">2024-03-01</div>
+                            </li>
+                            <li>
+                                <a href="#">春季时尚穿搭指南</a>
+                                <div class="post-date">2024-02-28</div>
+                            </li>
+                            <li>
+                                <a href="#">家电选购技巧大全</a>
+                                <div class="post-date">2024-02-25</div>
+                            </li>
+                            <li>
+                                <a href="#">健康饮食小贴士</a>
+                                <div class="post-date">2024-02-20</div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- 博客内容 -->
+                <div class="blog-content">
+                    <div class="blog-header">
+                        <h2 class="blog-title">博客列表</h2>
+                        <div class="blog-sort">
+                            <div class="sort-options">
+                                <div class="sort-option active">最新</div>
+                                <div class="sort-option">热门</div>
+                                <div class="sort-option">推荐</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="blog-list">
+                        <!-- 博客文章1 -->
+                        <div class="blog-post">
+                            <div class="post-image">
+                                <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=tech%20blog%20image&image_size=landscape_4_3" alt="科技博客">
+                            </div>
+                            <div class="post-content">
+                                <h3 class="post-title"><a href="#">2024年最值得购买的智能手机推荐</a></h3>
+                                <p class="post-excerpt">随着科技的不断发展，智能手机市场也在不断更新换代。本文将为您推荐2024年最值得购买的智能手机，包括各品牌的旗舰机型和性价比之选。我们将从性能、相机、续航、外观等多个方面进行详细分析，帮助您做出最适合自己的选择。</p>
+                                <div class="post-meta">
+                                    <span><i class="fa fa-user"></i> 科技达人</span>
+                                    <span><i class="fa fa-calendar"></i> 2024-03-01</span>
+                                    <span><i class="fa fa-eye"></i> 1200</span>
+                                    <span><i class="fa fa-comment"></i> 50</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 博客文章2 -->
+                        <div class="blog-post">
+                            <div class="post-image">
+                                <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=fashion%20blog%20image&image_size=landscape_4_3" alt="时尚博客">
+                            </div>
+                            <div class="post-content">
+                                <h3 class="post-title"><a href="#">春季时尚穿搭指南</a></h3>
+                                <p class="post-excerpt">春季来临，如何搭配出时尚又舒适的穿搭？本文将为您提供详细的春季时尚穿搭指南，包括不同场合的穿搭建议、流行单品推荐以及搭配技巧。无论是日常休闲、职场办公还是约会聚会，都能找到适合自己的穿搭风格。</p>
+                                <div class="post-meta">
+                                    <span><i class="fa fa-user"></i> 时尚编辑</span>
+                                    <span><i class="fa fa-calendar"></i> 2024-02-28</span>
+                                    <span><i class="fa fa-eye"></i> 800</span>
+                                    <span><i class="fa fa-comment"></i> 35</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 博客文章3 -->
+                        <div class="blog-post">
+                            <div class="post-image">
+                                <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=home%20appliances%20blog%20image&image_size=landscape_4_3" alt="家电博客">
+                            </div>
+                            <div class="post-content">
+                                <h3 class="post-title"><a href="#">家电选购技巧大全</a></h3>
+                                <p class="post-excerpt">购买家电时需要注意哪些方面？本文将为您提供详细的家电选购技巧，包括冰箱、洗衣机、空调、电视等常见家电的选购要点。我们将从品牌、性能、能耗、售后等多个方面进行分析，帮助您选择适合自己的家电产品。</p>
+                                <div class="post-meta">
+                                    <span><i class="fa fa-user"></i> 家电专家</span>
+                                    <span><i class="fa fa-calendar"></i> 2024-02-25</span>
+                                    <span><i class="fa fa-eye"></i> 1500</span>
+                                    <span><i class="fa fa-comment"></i> 60</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 博客文章4 -->
+                        <div class="blog-post">
+                            <div class="post-image">
+                                <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=food%20blog%20image&image_size=landscape_4_3" alt="美食博客">
+                            </div>
+                            <div class="post-content">
+                                <h3 class="post-title"><a href="#">健康饮食小贴士</a></h3>
+                                <p class="post-excerpt">健康的饮食是保持身体健康的重要因素。本文将为您提供一些健康饮食的小贴士，包括合理的饮食结构、食材选择、烹饪方式等。同时，我们还将推荐一些适合不同人群的健康食谱，帮助您养成良好的饮食习惯。</p>
+                                <div class="post-meta">
+                                    <span><i class="fa fa-user"></i> 营养师</span>
+                                    <span><i class="fa fa-calendar"></i> 2024-02-20</span>
+                                    <span><i class="fa fa-eye"></i> 950</span>
+                                    <span><i class="fa fa-comment"></i> 40</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 分页 -->
+                    <div class="pagination">
+                        <div class="page-item disabled">上一页</div>
+                        <div class="page-item active">1</div>
+                        <div class="page-item">2</div>
+                        <div class="page-item">3</div>
+                        <div class="page-item">4</div>
+                        <div class="page-item">5</div>
+                        <div class="page-item">下一页</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 页脚 -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>关于我们</h3>
+                    <p>OSP商城是一个分布式在线购物平台，提供优质的商品和服务。</p>
+                </div>
+                <div class="footer-section">
+                    <h3>客户服务</h3>
+                    <ul>
+                        <li><a href="#">帮助中心</a></li>
+                        <li><a href="#">联系我们</a></li>
+                        <li><a href="#">退换货政策</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>商家入驻</h3>
+                    <ul>
+                        <li><a href="#">商家入驻流程</a></li>
+                        <li><a href="#">商家后台</a></li>
+                        <li><a href="#">商家培训</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>关注我们</h3>
+                    <ul>
+                        <li><a href="#">微信公众号</a></li>
+                        <li><a href="#">微博</a></li>
+                        <li><a href="#">抖音</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 OSP商城 版权所有</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/script.js"></script>
+    <script>
+        // 排序选项点击事件
+        document.querySelectorAll('.sort-option').forEach(option => {
+            option.addEventListener('click', function() {
+                // 移除其他选项的active类
+                const siblings = this.parentElement.querySelectorAll('.sort-option');
+                siblings.forEach(sibling => sibling.classList.remove('active'));
+                // 添加当前选项的active类
+                this.classList.add('active');
+            });
+        });
+        
+        // 分页点击事件
+        document.querySelectorAll('.page-item:not(.disabled)').forEach(item => {
+            item.addEventListener('click', function() {
+                if (this.textContent === '上一页' || this.textContent === '下一页') {
+                    // 处理上一页/下一页逻辑
+                    alert(this.textContent);
+                } else {
+                    // 处理页码点击逻辑
+                    const siblings = this.parentElement.querySelectorAll('.page-item');
+                    siblings.forEach(sibling => sibling.classList.remove('active'));
+                    this.classList.add('active');
+                }
+            });
+        });
+        
+        // 分类点击事件
+        document.querySelectorAll('.category-list a').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const category = this.textContent;
+                alert(`正在查看 ${category} 分类的博客`);
+            });
+        });
+        
+        // 标签点击事件
+        document.querySelectorAll('.tag').forEach(tag => {
+            tag.addEventListener('click', function(e) {
+                e.preventDefault();
+                const tagName = this.textContent;
+                alert(`正在查看包含 ${tagName} 标签的博客`);
+            });
+        });
+        
+        // 博客标题点击事件
+        document.querySelectorAll('.post-title a').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const title = this.textContent;
+                alert(`正在查看博客：${title}`);
+            });
+        });
+    </script>
+</body>
+</html>

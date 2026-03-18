@@ -1,0 +1,79 @@
+# =====================================================
+# 微服务数据库连接配置示例
+# =====================================================
+# 使用说明：
+# 1. 复制此文件为 db_config.properties
+# 2. 修改 MySQL 密码和各服务数据库连接信息
+# 3. 在应用程序中引用此配置文件
+# =====================================================
+
+# =====================================================
+# 公共配置
+# =====================================================
+db.driver=com.mysql.cj.jdbc.Driver
+db.username=root
+db.password=你的 MySQL 密码
+
+# =====================================================
+# 各微服务数据库配置
+# =====================================================
+
+# 用户服务数据库
+user.db.url=jdbc:mysql://localhost:3306/user_db?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+
+# 商品服务数据库
+product.db.url=jdbc:mysql://localhost:3306/product_db?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+
+# 订单服务数据库
+order.db.url=jdbc:mysql://localhost:3306/order_db?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+
+# 支付服务数据库
+payment.db.url=jdbc:mysql://localhost:3306/payment_db?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+
+# 物流服务数据库
+shipment.db.url=jdbc:mysql://localhost:3306/shipment_db?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+
+# 评论服务数据库
+comment.db.url=jdbc:mysql://localhost:3306/comment_db?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+
+# 博客服务数据库
+blog.db.url=jdbc:mysql://localhost:3306/blog_db?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+
+# 短信服务数据库
+sms.db.url=jdbc:mysql://localhost:3306/sms_db?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+
+# 店铺服务数据库
+store.db.url=jdbc:mysql://localhost:3306/store_db?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+
+# =====================================================
+# 数据库连接池配置（HikariCP）
+# =====================================================
+db.pool.maximumPoolSize=10
+db.pool.minimumIdle=5
+db.pool.connectionTimeout=30000
+db.pool.idleTimeout=600000
+db.pool.maxLifetime=1800000
+
+# =====================================================
+# Redis 配置（用于缓存）
+# =====================================================
+redis.host=localhost
+redis.port=6379
+redis.password=
+redis.database=0
+redis.pool.maxTotal=20
+redis.pool.maxIdle=10
+redis.pool.minIdle=5
+
+# =====================================================
+# MyBatis 配置
+# =====================================================
+mybatis.mapperLocations=classpath:mapper/*.xml
+mybatis.typeAliasesPackage=com.shopping.platform.entity
+
+# =====================================================
+# 日志配置
+# =====================================================
+logging.level.com.shopping.platform=DEBUG
+logging.level.org.mybatis=DEBUG
+logging.level.java.sql=DEBUG

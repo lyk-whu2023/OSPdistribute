@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>分布式在线购物平台</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="logo">
+                <a href="index.html">OSP商城</a>
+            </div>
+            <ul class="nav-links">
+                <li><a href="index.html">首页</a></li>
+                <li><a href="products.html">商品</a></li>
+                <li><a href="stores.html">店铺</a></li>
+                <li><a href="blog.html">博客</a></li>
+                <li><a href="cart.html">购物车</a></li>
+                <li><a href="user.html">个人中心</a></li>
+            </ul>
+            <div class="search-box">
+                <input type="text" placeholder="搜索商品">
+                <button>搜索</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 轮播图 -->
+    <div class="carousel">
+        <div class="carousel-item active">
+            <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=online%20shopping%20mall%20banner%20with%20electronics%20products&image_size=landscape_16_9" alt="轮播图1">
+        </div>
+        <div class="carousel-item">
+            <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=fashion%20clothing%20online%20shopping%20banner&image_size=landscape_16_9" alt="轮播图2">
+        </div>
+        <div class="carousel-item">
+            <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=home%20appliances%20online%20shopping%20banner&image_size=landscape_16_9" alt="轮播图3">
+        </div>
+    </div>
+
+    <!-- 分类推荐 -->
+    <div class="categories">
+        <div class="container">
+            <h2>商品分类</h2>
+            <div class="category-grid">
+                <div class="category-item">
+                    <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=electronics%20category%20icon&image_size=square" alt="电子产品">
+                    <span>电子产品</span>
+                </div>
+                <div class="category-item">
+                    <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=fashion%20clothing%20category%20icon&image_size=square" alt="服装">
+                    <span>服装</span>
+                </div>
+                <div class="category-item">
+                    <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=home%20appliances%20category%20icon&image_size=square" alt="家电">
+                    <span>家电</span>
+                </div>
+                <div class="category-item">
+                    <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=food%20category%20icon&image_size=square" alt="食品">
+                    <span>食品</span>
+                </div>
+                <div class="category-item">
+                    <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=books%20category%20icon&image_size=square" alt="图书">
+                    <span>图书</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 热销商品 -->
+    <div class="hot-products">
+        <div class="container">
+            <h2>热销商品</h2>
+            <div class="product-grid">
+                <div class="product-item">
+                    <a href="product-detail.html"><img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=smartphone%20product%20image&image_size=square" alt="智能手机"></a>
+                    <h3><a href="product-detail.html">智能手机</a></h3>
+                    <p class="price">¥3999.00</p>
+                    <p class="sales">销量: 1200</p>
+                    <button class="add-to-cart">加入购物车</button>
+                </div>
+                <div class="product-item">
+                    <a href="product-detail.html"><img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=laptop%20computer%20product%20image&image_size=square" alt="笔记本电脑"></a>
+                    <h3><a href="product-detail.html">笔记本电脑</a></h3>
+                    <p class="price">¥5999.00</p>
+                    <p class="sales">销量: 800</p>
+                    <button class="add-to-cart">加入购物车</button>
+                </div>
+                <div class="product-item">
+                    <a href="product-detail.html"><img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=smart%20watch%20product%20image&image_size=square" alt="智能手表"></a>
+                    <h3><a href="product-detail.html">智能手表</a></h3>
+                    <p class="price">¥1299.00</p>
+                    <p class="sales">销量: 2000</p>
+                    <button class="add-to-cart">加入购物车</button>
+                </div>
+                <div class="product-item">
+                    <a href="product-detail.html"><img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=wireless%20earbuds%20product%20image&image_size=square" alt="无线耳机"></a>
+                    <h3><a href="product-detail.html">无线耳机</a></h3>
+                    <p class="price">¥899.00</p>
+                    <p class="sales">销量: 1500</p>
+                    <button class="add-to-cart">加入购物车</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 秒杀活动 -->
+    <div class="seckill">
+        <div class="container">
+            <h2>秒杀活动</h2>
+            <div class="seckill-products">
+                <div class="seckill-item">
+                    <div class="seckill-time">
+                        <span>剩余时间</span>
+                        <div class="time-countdown">
+                            <span>01</span>:
+                            <span>30</span>:
+                            <span>45</span>
+                        </div>
+                    </div>
+                    <a href="product-detail.html"><img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=smartphone%20seckill%20product&image_size=square" alt="秒杀商品1"></a>
+                    <h3><a href="product-detail.html">智能手机</a></h3>
+                    <div class="price">
+                        <span class="original-price">¥3999.00</span>
+                        <span class="seckill-price">¥2999.00</span>
+                    </div>
+                    <button class="seckill-btn">立即秒杀</button>
+                </div>
+                <div class="seckill-item">
+                    <div class="seckill-time">
+                        <span>剩余时间</span>
+                        <div class="time-countdown">
+                            <span>01</span>:
+                            <span>30</span>:
+                            <span>45</span>
+                        </div>
+                    </div>
+                    <a href="product-detail.html"><img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=smart%20watch%20seckill%20product&image_size=square" alt="秒杀商品2"></a>
+                    <h3><a href="product-detail.html">智能手表</a></h3>
+                    <div class="price">
+                        <span class="original-price">¥1299.00</span>
+                        <span class="seckill-price">¥899.00</span>
+                    </div>
+                    <button class="seckill-btn">立即秒杀</button>
+                </div>
+                <div class="seckill-item">
+                    <div class="seckill-time">
+                        <span>剩余时间</span>
+                        <div class="time-countdown">
+                            <span>01</span>:
+                            <span>30</span>:
+                            <span>45</span>
+                        </div>
+                    </div>
+                    <a href="product-detail.html"><img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=wireless%20earbuds%20seckill%20product&image_size=square" alt="秒杀商品3"></a>
+                    <h3><a href="product-detail.html">无线耳机</a></h3>
+                    <div class="price">
+                        <span class="original-price">¥899.00</span>
+                        <span class="seckill-price">¥599.00</span>
+                    </div>
+                    <button class="seckill-btn">立即秒杀</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 推荐店铺 -->
+    <div class="recommended-stores">
+        <div class="container">
+            <h2>推荐店铺</h2>
+            <div class="store-grid">
+                <div class="store-item">
+                    <a href="store-detail.html"><img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=electronics%20store%20logo&image_size=square" alt="店铺1"></a>
+                    <h3><a href="store-detail.html">电子科技旗舰店</a></h3>
+                    <div class="store-info">
+                        <span class="rating">4.9分</span>
+                        <span class="follow-count">12.5万关注</span>
+                    </div>
+                    <button class="follow-store">关注</button>
+                </div>
+                <div class="store-item">
+                    <a href="store-detail.html"><img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=fashion%20store%20logo&image_size=square" alt="店铺2"></a>
+                    <h3><a href="store-detail.html">时尚服饰店</a></h3>
+                    <div class="store-info">
+                        <span class="rating">4.7分</span>
+                        <span class="follow-count">8.3万关注</span>
+                    </div>
+                    <button class="follow-store">关注</button>
+                </div>
+                <div class="store-item">
+                    <a href="store-detail.html"><img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=home%20appliances%20store%20logo&image_size=square" alt="店铺3"></a>
+                    <h3><a href="store-detail.html">家电生活馆</a></h3>
+                    <div class="store-info">
+                        <span class="rating">4.8分</span>
+                        <span class="follow-count">9.7万关注</span>
+                    </div>
+                    <button class="follow-store">关注</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 最新博客 -->
+    <div class="latest-blogs">
+        <div class="container">
+            <h2>最新博客</h2>
+            <div class="blog-grid">
+                <div class="blog-item">
+                    <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=tech%20blog%20image&image_size=landscape_4_3" alt="博客1">
+                    <h3>2024年最值得购买的智能手机推荐</h3>
+                    <p class="blog-excerpt">随着科技的不断发展，智能手机市场也在不断更新换代。本文将为您推荐2024年最值得购买的智能手机...</p>
+                    <div class="blog-meta">
+                        <span class="author">作者: 科技达人</span>
+                        <span class="date">2024-03-01</span>
+                        <span class="views">阅读: 1200</span>
+                    </div>
+                </div>
+                <div class="blog-item">
+                    <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=fashion%20blog%20image&image_size=landscape_4_3" alt="博客2">
+                    <h3>春季时尚穿搭指南</h3>
+                    <p class="blog-excerpt">春季来临，如何搭配出时尚又舒适的穿搭？本文将为您提供详细的春季时尚穿搭指南...</p>
+                    <div class="blog-meta">
+                        <span class="author">作者: 时尚编辑</span>
+                        <span class="date">2024-02-28</span>
+                        <span class="views">阅读: 800</span>
+                    </div>
+                </div>
+                <div class="blog-item">
+                    <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=home%20appliances%20blog%20image&image_size=landscape_4_3" alt="博客3">
+                    <h3>家电选购技巧大全</h3>
+                    <p class="blog-excerpt">购买家电时需要注意哪些方面？本文将为您提供详细的家电选购技巧，帮助您选择适合自己的家电产品...</p>
+                    <div class="blog-meta">
+                        <span class="author">作者: 家电专家</span>
+                        <span class="date">2024-02-25</span>
+                        <span class="views">阅读: 1500</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 页脚 -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>关于我们</h3>
+                    <p>OSP商城是一个分布式在线购物平台，提供优质的商品和服务。</p>
+                </div>
+                <div class="footer-section">
+                    <h3>客户服务</h3>
+                    <ul>
+                        <li><a href="#">帮助中心</a></li>
+                        <li><a href="#">联系我们</a></li>
+                        <li><a href="#">退换货政策</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>商家入驻</h3>
+                    <ul>
+                        <li><a href="#">商家入驻流程</a></li>
+                        <li><a href="#">商家后台</a></li>
+                        <li><a href="#">商家培训</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>关注我们</h3>
+                    <ul>
+                        <li><a href="#">微信公众号</a></li>
+                        <li><a href="#">微博</a></li>
+                        <li><a href="#">抖音</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 OSP商城 版权所有</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/script.js"></script>
+</body>
+</html>

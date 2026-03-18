@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>商品列表 - OSP商城</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        /* 商品列表页特有样式 */
+        .products-page {
+            padding: 30px 0;
+        }
+        
+        .filter-section {
+            background-color: #f5f5f5;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+        
+        .filter-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        
+        .filter-group {
+            margin-bottom: 20px;
+        }
+        
+        .filter-group h4 {
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        
+        .filter-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .filter-option {
+            padding: 5px 15px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        .filter-option:hover {
+            border-color: #ff6b6b;
+            color: #ff6b6b;
+        }
+        
+        .filter-option.active {
+            background-color: #ff6b6b;
+            color: #fff;
+            border-color: #ff6b6b;
+        }
+        
+        .sort-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .sort-options {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .sort-option {
+            cursor: pointer;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .sort-option.active {
+            color: #ff6b6b;
+            font-weight: bold;
+        }
+        
+        .view-options {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .view-option {
+            padding: 5px 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .view-option.active {
+            background-color: #ff6b6b;
+            color: #fff;
+            border-color: #ff6b6b;
+        }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 30px;
+            gap: 10px;
+        }
+        
+        .page-item {
+            padding: 5px 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .page-item.active {
+            background-color: #ff6b6b;
+            color: #fff;
+            border-color: #ff6b6b;
+        }
+        
+        .page-item.disabled {
+            color: #999;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="logo">
+                <a href="index.html">OSP商城</a>
+            </div>
+            <ul class="nav-links">
+                <li><a href="index.html">首页</a></li>
+                <li><a href="products.html" style="color: #ff6b6b;">商品</a></li>
+                <li><a href="stores.html">店铺</a></li>
+                <li><a href="blog.html">博客</a></li>
+                <li><a href="cart.html">购物车</a></li>
+                <li><a href="user.html">个人中心</a></li>
+            </ul>
+            <div class="search-box">
+                <input type="text" placeholder="搜索商品">
+                <button>搜索</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 商品列表页 -->
+    <div class="products-page">
+        <div class="container">
+            <!-- 筛选区域 -->
+            <div class="filter-section">
+                <div class="filter-title">商品筛选</div>
+                
+                <!-- 分类筛选 -->
+                <div class="filter-group">
+                    <h4>商品分类</h4>
+                    <div class="filter-options">
+                        <div class="filter-option active">全部</div>
+                        <div class="filter-option">电子产品</div>
+                        <div class="filter-option">服装</div>
+                        <div class="filter-option">家电</div>
+                        <div class="filter-option">食品</div>
+                        <div class="filter-option">图书</div>
+                    </div>
+                </div>
+                
+                <!-- 价格筛选 -->
+                <div class="filter-group">
+                    <h4>价格区间</h4>
+                    <div class="filter-options">
+                        <div class="filter-option active">全部</div>
+                        <div class="filter-option">0-100元</div>
+                        <div class="filter-option">100-500元</div>
+                        <div class="filter-option">500-1000元</div>
+                        <div class="filter-option">1000-5000元</div>
+                        <div class="filter-option">5000元以上</div>
+                    </div>
+                </div>
+                
+                <!-- 品牌筛选 -->
+                <div class="filter-group">
+                    <h4>品牌</h4>
+                    <div class="filter-options">
+                        <div class="filter-option active">全部</div>
+                        <div class="filter-option">Apple</div>
+                        <div class="filter-option">Samsung</div>
+                        <div class="filter-option">Huawei</div>
+                        <div class="filter-option">Xiaomi</div>
+                        <div class="filter-option">OPPO</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 排序和视图切换 -->
+            <div class="sort-section">
+                <div class="sort-options">
+                    <div class="sort-option active">综合</div>
+                    <div class="sort-option">销量</div>
+                    <div class="sort-option">价格↑</div>
+                    <div class="sort-option">价格↓</div>
+                    <div class="sort-option">新品</div>
+                </div>
+                <div class="view-options">
+                    <div class="view-option active">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                            <rect x="1" y="1" width="6" height="6" rx="1"/>
+                            <rect x="9" y="1" width="6" height="6" rx="1"/>
+                            <rect x="1" y="9" width="6" height="6" rx="1"/>
+                            <rect x="9" y="9" width="6" height="6" rx="1"/>
+                        </svg>
+                    </div>
+                    <div class="view-option">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                            <rect x="1" y="1" width="14" height="6" rx="1"/>
+                            <rect x="1" y="9" width="14" height="6" rx="1"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 商品列表 -->
+            <div class="product-grid">
+                <div class="product-item">
+                    <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=smartphone%20product%20image&image_size=square" alt="智能手机">
+                    <h3>智能手机</h3>
+                    <p class="price">¥3999.00</p>
+                    <p class="sales">销量: 1200</p>
+                    <button class="add-to-cart">加入购物车</button>
+                </div>
+                <div class="product-item">
+                    <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=laptop%20computer%20product%20image&image_size=square" alt="笔记本电脑">
+                    <h3>笔记本电脑</h3>
+                    <p class="price">¥5999.00</p>
+                    <p class="sales">销量: 800</p>
+                    <button class="add-to-cart">加入购物车</button>
+                </div>
+                <div class="product-item">
+                    <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=smart%20watch%20product%20image&image_size=square" alt="智能手表">
+                    <h3>智能手表</h3>
+                    <p class="price">¥1299.00</p>
+                    <p class="sales">销量: 2000</p>
+                    <button class="add-to-cart">加入购物车</button>
+                </div>
+                <div class="product-item">
+                    <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=wireless%20earbuds%20product%20image&image_size=square" alt="无线耳机">
+                    <h3>无线耳机</h3>
+                    <p class="price">¥899.00</p>
+                    <p class="sales">销量: 1500</p>
+                    <button class="add-to-cart">加入购物车</button>
+                </div>
+                <div class="product-item">
+                    <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=tablet%20computer%20product%20image&image_size=square" alt="平板电脑">
+                    <h3>平板电脑</h3>
+                    <p class="price">¥2999.00</p>
+                    <p class="sales">销量: 600</p>
+                    <button class="add-to-cart">加入购物车</button>
+                </div>
+                <div class="product-item">
+                    <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=smart%20speaker%20product%20image&image_size=square" alt="智能音箱">
+                    <h3>智能音箱</h3>
+                    <p class="price">¥599.00</p>
+                    <p class="sales">销量: 1800</p>
+                    <button class="add-to-cart">加入购物车</button>
+                </div>
+                <div class="product-item">
+                    <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=fitness%20band%20product%20image&image_size=square" alt="运动手环">
+                    <h3>运动手环</h3>
+                    <p class="price">¥299.00</p>
+                    <p class="sales">销量: 2500</p>
+                    <button class="add-to-cart">加入购物车</button>
+                </div>
+                <div class="product-item">
+                    <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=portable%20charger%20product%20image&image_size=square" alt="移动电源">
+                    <h3>移动电源</h3>
+                    <p class="price">¥199.00</p>
+                    <p class="sales">销量: 3000</p>
+                    <button class="add-to-cart">加入购物车</button>
+                </div>
+            </div>
+            
+            <!-- 分页 -->
+            <div class="pagination">
+                <div class="page-item disabled">上一页</div>
+                <div class="page-item active">1</div>
+                <div class="page-item">2</div>
+                <div class="page-item">3</div>
+                <div class="page-item">4</div>
+                <div class="page-item">5</div>
+                <div class="page-item">下一页</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 页脚 -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>关于我们</h3>
+                    <p>OSP商城是一个分布式在线购物平台，提供优质的商品和服务。</p>
+                </div>
+                <div class="footer-section">
+                    <h3>客户服务</h3>
+                    <ul>
+                        <li><a href="#">帮助中心</a></li>
+                        <li><a href="#">联系我们</a></li>
+                        <li><a href="#">退换货政策</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>商家入驻</h3>
+                    <ul>
+                        <li><a href="#">商家入驻流程</a></li>
+                        <li><a href="#">商家后台</a></li>
+                        <li><a href="#">商家培训</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>关注我们</h3>
+                    <ul>
+                        <li><a href="#">微信公众号</a></li>
+                        <li><a href="#">微博</a></li>
+                        <li><a href="#">抖音</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 OSP商城 版权所有</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/script.js"></script>
+    <script>
+        // 筛选选项点击事件
+        document.querySelectorAll('.filter-option').forEach(option => {
+            option.addEventListener('click', function() {
+                // 移除同组其他选项的active类
+                const siblings = this.parentElement.querySelectorAll('.filter-option');
+                siblings.forEach(sibling => sibling.classList.remove('active'));
+                // 添加当前选项的active类
+                this.classList.add('active');
+            });
+        });
+        
+        // 排序选项点击事件
+        document.querySelectorAll('.sort-option').forEach(option => {
+            option.addEventListener('click', function() {
+                // 移除其他选项的active类
+                const siblings = this.parentElement.querySelectorAll('.sort-option');
+                siblings.forEach(sibling => sibling.classList.remove('active'));
+                // 添加当前选项的active类
+                this.classList.add('active');
+            });
+        });
+        
+        // 视图切换点击事件
+        document.querySelectorAll('.view-option').forEach(option => {
+            option.addEventListener('click', function() {
+                // 移除其他选项的active类
+                const siblings = this.parentElement.querySelectorAll('.view-option');
+                siblings.forEach(sibling => sibling.classList.remove('active'));
+                // 添加当前选项的active类
+                this.classList.add('active');
+            });
+        });
+        
+        // 分页点击事件
+        document.querySelectorAll('.page-item:not(.disabled)').forEach(item => {
+            item.addEventListener('click', function() {
+                if (this.textContent === '上一页' || this.textContent === '下一页') {
+                    // 处理上一页/下一页逻辑
+                    alert(this.textContent);
+                } else {
+                    // 处理页码点击逻辑
+                    const siblings = this.parentElement.querySelectorAll('.page-item');
+                    siblings.forEach(sibling => sibling.classList.remove('active'));
+                    this.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>购物车 - OSP商城</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        /* 购物车页特有样式 */
+        .cart-page {
+            padding: 30px 0;
+        }
+        
+        .cart-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        
+        .cart-table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .cart-table th,
+        .cart-table td {
+            padding: 15px;
+            text-align: center;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .cart-table th {
+            background-color: #f5f5f5;
+            font-weight: bold;
+        }
+        
+        .cart-item-img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+        }
+        
+        .cart-item-name {
+            text-align: left;
+            max-width: 300px;
+        }
+        
+        .quantity-control {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .quantity-btn {
+            width: 30px;
+            height: 30px;
+            border: 1px solid #ddd;
+            background-color: #f5f5f5;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .quantity-input {
+            width: 50px;
+            height: 30px;
+            border: 1px solid #ddd;
+            text-align: center;
+            outline: none;
+        }
+        
+        .cart-total {
+            margin-top: 30px;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            background-color: #f5f5f5;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        
+        .total-label {
+            font-size: 16px;
+            margin-right: 20px;
+        }
+        
+        .total-price {
+            font-size: 24px;
+            font-weight: bold;
+            color: #ff6b6b;
+            margin-right: 30px;
+        }
+        
+        .checkout-btn {
+            padding: 12px 30px;
+            background-color: #ff6b6b;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .checkout-btn:hover {
+            background-color: #ff5252;
+        }
+        
+        .empty-cart {
+            text-align: center;
+            padding: 100px 0;
+        }
+        
+        .empty-cart img {
+            width: 150px;
+            margin-bottom: 20px;
+        }
+        
+        .empty-cart p {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 20px;
+        }
+        
+        .continue-shopping {
+            padding: 10px 20px;
+            background-color: #4caf50;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .continue-shopping:hover {
+            background-color: #45a049;
+        }
+        
+        .delete-btn {
+            color: #ff6b6b;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .delete-btn:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="logo">
+                <a href="index.html">OSP商城</a>
+            </div>
+            <ul class="nav-links">
+                <li><a href="index.html">首页</a></li>
+                <li><a href="products.html">商品</a></li>
+                <li><a href="stores.html">店铺</a></li>
+                <li><a href="blog.html">博客</a></li>
+                <li><a href="cart.html" style="color: #ff6b6b;">购物车</a></li>
+                <li><a href="user.html">个人中心</a></li>
+            </ul>
+            <div class="search-box">
+                <input type="text" placeholder="搜索商品">
+                <button>搜索</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 购物车页面 -->
+    <div class="cart-page">
+        <div class="container">
+            <h2 class="cart-title">我的购物车</h2>
+            
+            <!-- 购物车表格 -->
+            <table class="cart-table">
+                <thead>
+                    <tr>
+                        <th><input type="checkbox" checked></th>
+                        <th>商品信息</th>
+                        <th>单价</th>
+                        <th>数量</th>
+                        <th>小计</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><input type="checkbox" checked></td>
+                        <td>
+                            <div class="cart-item-name">
+                                <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=smartphone%20product%20image&image_size=square" alt="智能手机" class="cart-item-img">
+                                <div style="display: inline-block; vertical-align: top; margin-left: 10px;">
+                                    <h4>智能手机</h4>
+                                    <p style="font-size: 12px; color: #999;">颜色: 黑色 内存: 128GB</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td>¥3999.00</td>
+                        <td>
+                            <div class="quantity-control">
+                                <div class="quantity-btn minus">-</div>
+                                <input type="number" class="quantity-input" value="1" min="1">
+                                <div class="quantity-btn plus">+</div>
+                            </div>
+                        </td>
+                        <td>¥3999.00</td>
+                        <td class="delete-btn">删除</td>
+                    </tr>
+                    <tr>
+                        <td><input type="checkbox" checked></td>
+                        <td>
+                            <div class="cart-item-name">
+                                <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=smart%20watch%20product%20image&image_size=square" alt="智能手表" class="cart-item-img">
+                                <div style="display: inline-block; vertical-align: top; margin-left: 10px;">
+                                    <h4>智能手表</h4>
+                                    <p style="font-size: 12px; color: #999;">颜色: 银色</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td>¥1299.00</td>
+                        <td>
+                            <div class="quantity-control">
+                                <div class="quantity-btn minus">-</div>
+                                <input type="number" class="quantity-input" value="2" min="1">
+                                <div class="quantity-btn plus">+</div>
+                            </div>
+                        </td>
+                        <td>¥2598.00</td>
+                        <td class="delete-btn">删除</td>
+                    </tr>
+                    <tr>
+                        <td><input type="checkbox" checked></td>
+                        <td>
+                            <div class="cart-item-name">
+                                <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=wireless%20earbuds%20product%20image&image_size=square" alt="无线耳机" class="cart-item-img">
+                                <div style="display: inline-block; vertical-align: top; margin-left: 10px;">
+                                    <h4>无线耳机</h4>
+                                    <p style="font-size: 12px; color: #999;">颜色: 白色</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td>¥899.00</td>
+                        <td>
+                            <div class="quantity-control">
+                                <div class="quantity-btn minus">-</div>
+                                <input type="number" class="quantity-input" value="1" min="1">
+                                <div class="quantity-btn plus">+</div>
+                            </div>
+                        </td>
+                        <td>¥899.00</td>
+                        <td class="delete-btn">删除</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <!-- 购物车总计 -->
+            <div class="cart-total">
+                <div class="total-label">合计：</div>
+                <div class="total-price">¥7496.00</div>
+                <button class="checkout-btn">去结算</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 页脚 -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>关于我们</h3>
+                    <p>OSP商城是一个分布式在线购物平台，提供优质的商品和服务。</p>
+                </div>
+                <div class="footer-section">
+                    <h3>客户服务</h3>
+                    <ul>
+                        <li><a href="#">帮助中心</a></li>
+                        <li><a href="#">联系我们</a></li>
+                        <li><a href="#">退换货政策</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>商家入驻</h3>
+                    <ul>
+                        <li><a href="#">商家入驻流程</a></li>
+                        <li><a href="#">商家后台</a></li>
+                        <li><a href="#">商家培训</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>关注我们</h3>
+                    <ul>
+                        <li><a href="#">微信公众号</a></li>
+                        <li><a href="#">微博</a></li>
+                        <li><a href="#">抖音</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 OSP商城 版权所有</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/script.js"></script>
+    <script>
+        // 数量控制
+        document.querySelectorAll('.quantity-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const input = this.parentElement.querySelector('.quantity-input');
+                let value = parseInt(input.value);
+                
+                if (this.classList.contains('plus')) {
+                    value++;
+                } else if (this.classList.contains('minus') && value > 1) {
+                    value--;
+                }
+                
+                input.value = value;
+                // 更新小计
+                updateSubtotal(this);
+                // 更新总计
+                updateTotal();
+            });
+        });
+        
+        // 输入框数量变化
+        document.querySelectorAll('.quantity-input').forEach(input => {
+            input.addEventListener('change', function() {
+                let value = parseInt(this.value);
+                if (isNaN(value) || value < 1) {
+                    this.value = 1;
+                    value = 1;
+                }
+                // 更新小计
+                updateSubtotal(this);
+                // 更新总计
+                updateTotal();
+            });
+        });
+        
+        // 更新小计
+        function updateSubtotal(element) {
+            const row = element.closest('tr');
+            const price = parseFloat(row.querySelector('td:nth-child(3)').textContent.replace('¥', ''));
+            const quantity = parseInt(row.querySelector('.quantity-input').value);
+            const subtotal = price * quantity;
+            row.querySelector('td:nth-child(5)').textContent = `¥${subtotal.toFixed(2)}`;
+        }
+        
+        // 更新总计
+        function updateTotal() {
+            let total = 0;
+            document.querySelectorAll('tbody tr').forEach(row => {
+                const checkbox = row.querySelector('input[type="checkbox"]');
+                if (checkbox.checked) {
+                    const subtotal = parseFloat(row.querySelector('td:nth-child(5)').textContent.replace('¥', ''));
+                    total += subtotal;
+                }
+            });
+            document.querySelector('.total-price').textContent = `¥${total.toFixed(2)}`;
+        }
+        
+        // 复选框点击事件
+        document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                if (this === document.querySelector('thead input[type="checkbox"]')) {
+                    // 全选/取消全选
+                    const checked = this.checked;
+                    document.querySelectorAll('tbody input[type="checkbox"]').forEach(cb => {
+                        cb.checked = checked;
+                    });
+                }
+                // 更新总计
+                updateTotal();
+            });
+        });
+        
+        // 删除商品
+        document.querySelectorAll('.delete-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                if (confirm('确定要删除这个商品吗？')) {
+                    const row = this.closest('tr');
+                    row.remove();
+                    // 更新总计
+                    updateTotal();
+                }
+            });
+        });
+        
+        // 去结算
+        document.querySelector('.checkout-btn').addEventListener('click', function() {
+            const checkedCount = document.querySelectorAll('tbody input[type="checkbox"]:checked').length;
+            if (checkedCount === 0) {
+                alert('请选择要结算的商品');
+            } else {
+                alert('正在跳转到结算页面...');
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>店铺列表 - OSP商城</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        /* 店铺列表页特有样式 */
+        .stores-page {
+            padding: 30px 0;
+        }
+        
+        .stores-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        
+        .store-filter {
+            background-color: #f5f5f5;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+        
+        .filter-row {
+            display: flex;
+            margin-bottom: 15px;
+            align-items: center;
+        }
+        
+        .filter-label {
+            width: 100px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        
+        .filter-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            flex: 1;
+        }
+        
+        .filter-option {
+            padding: 5px 15px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        .filter-option:hover {
+            border-color: #ff6b6b;
+            color: #ff6b6b;
+        }
+        
+        .filter-option.active {
+            background-color: #ff6b6b;
+            color: #fff;
+            border-color: #ff6b6b;
+        }
+        
+        .store-sort {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .sort-options {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .sort-option {
+            cursor: pointer;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .sort-option.active {
+            color: #ff6b6b;
+            font-weight: bold;
+        }
+        
+        .store-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+        
+        .store-card {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: transform 0.3s;
+        }
+        
+        .store-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .store-header {
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .store-logo {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 50%;
+            margin-bottom: 15px;
+        }
+        
+        .store-name {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .store-info {
+            display: flex;
+            justify-content: space-around;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .store-rating {
+            color: #ff9800;
+        }
+        
+        .store-body {
+            padding: 20px;
+        }
+        
+        .store-desc {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+        
+        .store-products {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+        
+        .store-product {
+            text-align: center;
+        }
+        
+        .store-product img {
+            width: 100%;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 4px;
+            margin-bottom: 5px;
+        }
+        
+        .store-product p {
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .store-footer {
+            padding: 15px 20px;
+            background-color: #f9f9f9;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .follow-btn {
+            padding: 5px 15px;
+            background-color: #4caf50;
+            color: #fff;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+        
+        .follow-btn:hover {
+            background-color: #45a049;
+        }
+        
+        .enter-btn {
+            padding: 5px 15px;
+            background-color: #ff6b6b;
+            color: #fff;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+        
+        .enter-btn:hover {
+            background-color: #ff5252;
+        }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 30px;
+            gap: 10px;
+        }
+        
+        .page-item {
+            padding: 5px 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .page-item.active {
+            background-color: #ff6b6b;
+            color: #fff;
+            border-color: #ff6b6b;
+        }
+        
+        .page-item.disabled {
+            color: #999;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="logo">
+                <a href="index.html">OSP商城</a>
+            </div>
+            <ul class="nav-links">
+                <li><a href="index.html">首页</a></li>
+                <li><a href="products.html">商品</a></li>
+                <li><a href="stores.html" style="color: #ff6b6b;">店铺</a></li>
+                <li><a href="blog.html">博客</a></li>
+                <li><a href="cart.html">购物车</a></li>
+                <li><a href="user.html">个人中心</a></li>
+            </ul>
+            <div class="search-box">
+                <input type="text" placeholder="搜索商品">
+                <button>搜索</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 店铺列表页面 -->
+    <div class="stores-page">
+        <div class="container">
+            <h2 class="stores-title">店铺列表</h2>
+            
+            <!-- 店铺筛选 -->
+            <div class="store-filter">
+                <div class="filter-row">
+                    <div class="filter-label">店铺类型</div>
+                    <div class="filter-options">
+                        <div class="filter-option active">全部</div>
+                        <div class="filter-option">旗舰店</div>
+                        <div class="filter-option">专卖店</div>
+                        <div class="filter-option">专营店</div>
+                        <div class="filter-option">普通店</div>
+                    </div>
+                </div>
+                <div class="filter-row">
+                    <div class="filter-label">商品分类</div>
+                    <div class="filter-options">
+                        <div class="filter-option active">全部</div>
+                        <div class="filter-option">电子产品</div>
+                        <div class="filter-option">服装</div>
+                        <div class="filter-option">家电</div>
+                        <div class="filter-option">食品</div>
+                        <div class="filter-option">图书</div>
+                    </div>
+                </div>
+                <div class="filter-row">
+                    <div class="filter-label">评分</div>
+                    <div class="filter-options">
+                        <div class="filter-option active">全部</div>
+                        <div class="filter-option">4.5分以上</div>
+                        <div class="filter-option">4分以上</div>
+                        <div class="filter-option">3.5分以上</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 排序 -->
+            <div class="store-sort">
+                <div class="sort-options">
+                    <div class="sort-option active">综合</div>
+                    <div class="sort-option">关注数</div>
+                    <div class="sort-option">评分</div>
+                    <div class="sort-option">新品</div>
+                </div>
+            </div>
+            
+            <!-- 店铺列表 -->
+            <div class="store-grid">
+                <!-- 店铺1 -->
+                <div class="store-card">
+                    <div class="store-header">
+                        <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=electronics%20store%20logo&image_size=square" alt="电子科技旗舰店" class="store-logo">
+                        <h3 class="store-name">电子科技旗舰店</h3>
+                        <div class="store-info">
+                            <span class="store-rating">4.9分</span>
+                            <span>12.5万关注</span>
+                            <span>300+商品</span>
+                        </div>
+                    </div>
+                    <div class="store-body">
+                        <p class="store-desc">专业销售各类电子产品，包括手机、电脑、平板等，品质保证，售后完善。</p>
+                        <div class="store-products">
+                            <div class="store-product">
+                                <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=smartphone%20product%20image&image_size=square" alt="智能手机">
+                                <p>智能手机</p>
+                            </div>
+                            <div class="store-product">
+                                <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=laptop%20computer%20product%20image&image_size=square" alt="笔记本电脑">
+                                <p>笔记本电脑</p>
+                            </div>
+                            <div class="store-product">
+                                <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=tablet%20computer%20product%20image&image_size=square" alt="平板电脑">
+                                <p>平板电脑</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="store-footer">
+                        <button class="follow-btn">关注</button>
+                        <button class="enter-btn">进店</button>
+                    </div>
+                </div>
+                
+                <!-- 店铺2 -->
+                <div class="store-card">
+                    <div class="store-header">
+                        <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=fashion%20store%20logo&image_size=square" alt="时尚服饰店" class="store-logo">
+                        <h3 class="store-name">时尚服饰店</h3>
+                        <div class="store-info">
+                            <span class="store-rating">4.7分</span>
+                            <span>8.3万关注</span>
+                            <span>500+商品</span>
+                        </div>
+                    </div>
+                    <div class="store-body">
+                        <p class="store-desc">潮流时尚服饰，包括男装、女装、童装等，款式多样，价格实惠。</p>
+                        <div class="store-products">
+                            <div class="store-product">
+                                <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=men%20clothing%20product&image_size=square" alt="男装">
+                                <p>男装</p>
+                            </div>
+                            <div class="store-product">
+                                <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=women%20clothing%20product&image_size=square" alt="女装">
+                                <p>女装</p>
+                            </div>
+                            <div class="store-product">
+                                <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=children%20clothing%20product&image_size=square" alt="童装">
+                                <p>童装</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="store-footer">
+                        <button class="follow-btn">关注</button>
+                        <button class="enter-btn">进店</button>
+                    </div>
+                </div>
+                
+                <!-- 店铺3 -->
+                <div class="store-card">
+                    <div class="store-header">
+                        <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=home%20appliances%20store%20logo&image_size=square" alt="家电生活馆" class="store-logo">
+                        <h3 class="store-name">家电生活馆</h3>
+                        <div class="store-info">
+                            <span class="store-rating">4.8分</span>
+                            <span>9.7万关注</span>
+                            <span>200+商品</span>
+                        </div>
+                    </div>
+                    <div class="store-body">
+                        <p class="store-desc">各类家用电器，包括冰箱、洗衣机、空调等，品牌齐全，服务周到。</p>
+                        <div class="store-products">
+                            <div class="store-product">
+                                <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=refrigerator%20home%20appliance&image_size=square" alt="冰箱">
+                                <p>冰箱</p>
+                            </div>
+                            <div class="store-product">
+                                <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=washing%20machine%20home%20appliance&image_size=square" alt="洗衣机">
+                                <p>洗衣机</p>
+                            </div>
+                            <div class="store-product">
+                                <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=air%20conditioner%20home%20appliance&image_size=square" alt="空调">
+                                <p>空调</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="store-footer">
+                        <button class="follow-btn">关注</button>
+                        <button class="enter-btn">进店</button>
+                    </div>
+                </div>
+                
+                <!-- 店铺4 -->
+                <div class="store-card">
+                    <div class="store-header">
+                        <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=food%20store%20logo&image_size=square" alt="美食天地" class="store-logo">
+                        <h3 class="store-name">美食天地</h3>
+                        <div class="store-info">
+                            <span class="store-rating">4.6分</span>
+                            <span>6.8万关注</span>
+                            <span>400+商品</span>
+                        </div>
+                    </div>
+                    <div class="store-body">
+                        <p class="store-desc">各种美食小吃，包括零食、饮料、水果等，新鲜美味，价格实惠。</p>
+                        <div class="store-products">
+                            <div class="store-product">
+                                <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=snacks%20food%20product&image_size=square" alt="零食">
+                                <p>零食</p>
+                            </div>
+                            <div class="store-product">
+                                <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=drinks%20food%20product&image_size=square" alt="饮料">
+                                <p>饮料</p>
+                            </div>
+                            <div class="store-product">
+                                <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=fruits%20food%20product&image_size=square" alt="水果">
+                                <p>水果</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="store-footer">
+                        <button class="follow-btn">关注</button>
+                        <button class="enter-btn">进店</button>
+                    </div>
+                </div>
+                
+                <!-- 店铺5 -->
+                <div class="store-card">
+                    <div class="store-header">
+                        <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=books%20store%20logo&image_size=square" alt="知识书屋" class="store-logo">
+                        <h3 class="store-name">知识书屋</h3>
+                        <div class="store-info">
+                            <span class="store-rating">4.9分</span>
+                            <span>5.2万关注</span>
+                            <span>1000+商品</span>
+                        </div>
+                    </div>
+                    <div class="store-body">
+                        <p class="store-desc">各类图书，包括小说、教材、工具书等，种类齐全，价格优惠。</p>
+                        <div class="store-products">
+                            <div class="store-product">
+                                <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=novel%20books%20product&image_size=square" alt="小说">
+                                <p>小说</p>
+                            </div>
+                            <div class="store-product">
+                                <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=textbooks%20books%20product&image_size=square" alt="教材">
+                                <p>教材</p>
+                            </div>
+                            <div class="store-product">
+                                <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=reference%20books%20product&image_size=square" alt="工具书">
+                                <p>工具书</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="store-footer">
+                        <button class="follow-btn">关注</button>
+                        <button class="enter-btn">进店</button>
+                    </div>
+                </div>
+                
+                <!-- 店铺6 -->
+                <div class="store-card">
+                    <div class="store-header">
+                        <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=sports%20store%20logo&image_size=square" alt="运动户外" class="store-logo">
+                        <h3 class="store-name">运动户外</h3>
+                        <div class="store-info">
+                            <span class="store-rating">4.7分</span>
+                            <span>7.5万关注</span>
+                            <span>350+商品</span>
+                        </div>
+                    </div>
+                    <div class="store-body">
+                        <p class="store-desc">运动户外用品，包括服装、器材、配件等，品质保证，价格合理。</p>
+                        <div class="store-products">
+                            <div class="store-product">
+                                <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=sports%20clothing%20product&image_size=square" alt="运动服装">
+                                <p>运动服装</p>
+                            </div>
+                            <div class="store-product">
+                                <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=sports%20equipment%20product&image_size=square" alt="运动器材">
+                                <p>运动器材</p>
+                            </div>
+                            <div class="store-product">
+                                <img src="https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=sports%20accessories%20product&image_size=square" alt="运动配件">
+                                <p>运动配件</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="store-footer">
+                        <button class="follow-btn">关注</button>
+                        <button class="enter-btn">进店</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 分页 -->
+            <div class="pagination">
+                <div class="page-item disabled">上一页</div>
+                <div class="page-item active">1</div>
+                <div class="page-item">2</div>
+                <div class="page-item">3</div>
+                <div class="page-item">4</div>
+                <div class="page-item">5</div>
+                <div class="page-item">下一页</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 页脚 -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>关于我们</h3>
+                    <p>OSP商城是一个分布式在线购物平台，提供优质的商品和服务。</p>
+                </div>
+                <div class="footer-section">
+                    <h3>客户服务</h3>
+                    <ul>
+                        <li><a href="#">帮助中心</a></li>
+                        <li><a href="#">联系我们</a></li>
+                        <li><a href="#">退换货政策</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>商家入驻</h3>
+                    <ul>
+                        <li><a href="#">商家入驻流程</a></li>
+                        <li><a href="#">商家后台</a></li>
+                        <li><a href="#">商家培训</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>关注我们</h3>
+                    <ul>
+                        <li><a href="#">微信公众号</a></li>
+                        <li><a href="#">微博</a></li>
+                        <li><a href="#">抖音</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 OSP商城 版权所有</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/script.js"></script>
+    <script>
+        // 筛选选项点击事件
+        document.querySelectorAll('.filter-option').forEach(option => {
+            option.addEventListener('click', function() {
+                // 移除同组其他选项的active类
+                const siblings = this.parentElement.querySelectorAll('.filter-option');
+                siblings.forEach(sibling => sibling.classList.remove('active'));
+                // 添加当前选项的active类
+                this.classList.add('active');
+            });
+        });
+        
+        // 排序选项点击事件
+        document.querySelectorAll('.sort-option').forEach(option => {
+            option.addEventListener('click', function() {
+                // 移除其他选项的active类
+                const siblings = this.parentElement.querySelectorAll('.sort-option');
+                siblings.forEach(sibling => sibling.classList.remove('active'));
+                // 添加当前选项的active类
+                this.classList.add('active');
+            });
+        });
+        
+        // 关注按钮点击事件
+        document.querySelectorAll('.follow-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const storeName = this.closest('.store-card').querySelector('.store-name').textContent;
+                if (this.textContent === '关注') {
+                    this.textContent = '已关注';
+                    this.style.backgroundColor = '#999';
+                    alert(`已关注 ${storeName}`);
+                } else {
+                    this.textContent = '关注';
+                    this.style.backgroundColor = '#4caf50';
+                    alert(`已取消关注 ${storeName}`);
+                }
+            });
+        });
+        
+        // 进店按钮点击事件
+        document.querySelectorAll('.enter-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const storeName = this.closest('.store-card').querySelector('.store-name').textContent;
+                alert(`正在进入 ${storeName}...`);
+            });
+        });
+        
+        // 分页点击事件
+        document.querySelectorAll('.page-item:not(.disabled)').forEach(item => {
+            item.addEventListener('click', function() {
+                if (this.textContent === '上一页' || this.textContent === '下一页') {
+                    // 处理上一页/下一页逻辑
+                    alert(this.textContent);
+                } else {
+                    // 处理页码点击逻辑
+                    const siblings = this.parentElement.querySelectorAll('.page-item');
+                    siblings.forEach(sibling => sibling.classList.remove('active'));
+                    this.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
