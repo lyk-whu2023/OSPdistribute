@@ -34,7 +34,6 @@
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-bootstrap</artifactId>
         </dependency>
-        
         <!-- MySQL 驱动 -->
         <dependency>
             <groupId>com.mysql</groupId>
@@ -48,7 +47,7 @@
             <artifactId>mybatis-plus-boot-starter</artifactId>
         </dependency>
         
-        <!-- JWT -->
+        <!-- JWT - 版本由父 POM 管理 -->
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-api</artifactId>
