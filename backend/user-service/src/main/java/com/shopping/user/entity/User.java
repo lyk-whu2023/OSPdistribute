@@ -18,7 +18,7 @@ public class User {
     private String phone;
     private String email;
     private String nickname;
-    private String avatar;
+    private String avatar;//存储头像图片url
     private Integer gender;
     private LocalDateTime birthday;
     private LocalDateTime registerTime;

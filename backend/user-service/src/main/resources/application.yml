@@ -2,6 +2,21 @@ server:
   port: 8081
 
 spring:
+  application:
+    name: user-service
+  main:
+    web-application-type: reactive
+  profiles:
+    active: dev
+  cloud:
+    config:
+      enabled: false
+  # eureka相关配置方便测试，实际环境需要注释
+  eureka:
+    client:
+      enabled: false
+    instance:
+      prefer-ip-address: true
   datasource:
     url: jdbc:mysql://localhost:3306/user_db?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai
     username: root
@@ -10,6 +25,21 @@ spring:
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
     time-zone: Asia/Shanghai
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password:
+      database: 0
+      timeout: 5000ms
+      lettuce:
+        pool:
+          enabled: true
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+          time-between-eviction-runs: 60000ms
+        shutdown-timeout: 100ms
 
 mybatis-plus:
   mapper-locations: classpath*:/mapper/**/*.xml
@@ -18,14 +48,16 @@ mybatis-plus:
     map-underscore-to-camel-case: true
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
 
-eureka:
-  client:
-    service-url:
-      defaultZone: http://localhost:8761/eureka/
-  instance:
-    prefer-ip-address: true
-    instance-id: ${spring.application.name}:${server.port}
+# eureka:
+#   client:
+#     service-url:
+#       defaultZone: http://localhost:8761/eureka/
+#   instance:
+#     prefer-ip-address: true
+#     instance-id: ${spring.application.name}:${server.port}
 
 jwt:
   secret: YxtrduwQ7U2jEJMH96bgmyLvnP8e3qTNVaKSWFfRhDCcXkBz
   expiration: 86400000
+  header: Authorization
+  prefix: Bearer 
