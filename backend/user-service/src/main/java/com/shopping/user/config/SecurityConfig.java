@@ -16,7 +16,7 @@ import org.springframework.security.web.server.SecurityWebFilterChain;
 @Configuration
 @EnableWebFluxSecurity
 public class SecurityConfig {
-    
+
     /**
      * 密码编码器
      * 使用 BCrypt 强哈希算法加密用户密码
@@ -40,7 +40,7 @@ public class SecurityConfig {
             )
             .httpBasic(basic -> basic.disable()) // 禁用 HTTP Basic
             .formLogin(form -> form.disable()); // 禁用表单登录
-        
+
         return http.build();
     }
 }

@@ -23,7 +23,7 @@ public class JwtUtil {
     private String secret;
     @Value("${jwt.expiration}")
     private Long expiration;
-    
+
     // Redis 模板，用于存储令牌黑名单
     @javax.annotation.Resource
     private RedisTemplate<String, String> redisTemplate;
