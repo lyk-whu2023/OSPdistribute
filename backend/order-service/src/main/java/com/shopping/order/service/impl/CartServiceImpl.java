@@ -26,23 +26,24 @@ public class CartServiceImpl implements CartService {
     
     @Override
     public CartResponse getOrCreateCart(Long userId) {
-        Cart cart = cartMapper.selectOne(new LambdaQueryWrapper<Cart>()
-            .eq(Cart::getUserId, userId));
+        Cart cart = getCart(userId);
         
         if (cart == null) {
-            cart = new Cart();
-            cart.setUserId(userId);
-            cart.setCreateTime(LocalDateTime.now());
-            cart.setUpdateTime(LocalDateTime.now());
-            cartMapper.insert(cart);
+            cart = createCart(userId);
         }
         
         CartResponse response = new CartResponse();
         response.setCartId(cart.getId());
         response.setUserId(cart.getUserId());
-        response.setItems(getCartItems(userId));
         
-        BigDecimal totalAmount = response.getItems().stream()
+        List<CartItemResponse> items = cartItemMapper.selectList(new LambdaQueryWrapper<CartItem>()
+            .eq(CartItem::getCartId, cart.getId()))
+            .stream()
+            .map(this::convertToResponse)
+            .collect(Collectors.toList());
+        response.setItems(items);
+        
+        BigDecimal totalAmount = items.stream()
             .map(item -> item.getPrice().multiply(new BigDecimal(item.getQuantity())))
             .reduce(BigDecimal.ZERO, BigDecimal::add);
         response.setTotalAmount(totalAmount);
@@ -52,7 +53,10 @@ public class CartServiceImpl implements CartService {
     
     @Override
     public List<CartItemResponse> getCartItems(Long userId) {
-        Cart cart = getOrCreateCart(userId);
+        Cart cart = getCart(userId);
+        if (cart == null) {
+            return List.of();
+        }
         return cartItemMapper.selectList(new LambdaQueryWrapper<CartItem>()
             .eq(CartItem::getCartId, cart.getId()))
             .stream()
@@ -63,7 +67,10 @@ public class CartServiceImpl implements CartService {
     @Override
     @Transactional
     public void addToCart(Long userId, Long productId, Long skuId, Integer quantity, String productName, String skuName, BigDecimal price) {
-        Cart cart = getOrCreateCart(userId);
+        Cart cart = getCart(userId);
+        if (cart == null) {
+            cart = createCart(userId);
+        }
         
         CartItem existingItem = cartItemMapper.selectOne(new LambdaQueryWrapper<CartItem>()
             .eq(CartItem::getCartId, cart.getId())
@@ -114,9 +121,25 @@ public class CartServiceImpl implements CartService {
     @Override
     @Transactional
     public void clearCart(Long userId) {
-        Cart cart = getOrCreateCart(userId);
-        cartItemMapper.delete(new LambdaQueryWrapper<CartItem>()
-            .eq(CartItem::getCartId, cart.getId()));
+        Cart cart = getCart(userId);
+        if (cart != null) {
+            cartItemMapper.delete(new LambdaQueryWrapper<CartItem>()
+                .eq(CartItem::getCartId, cart.getId()));
+        }
+    }
+    
+    private Cart getCart(Long userId) {
+        return cartMapper.selectOne(new LambdaQueryWrapper<Cart>()
+            .eq(Cart::getUserId, userId));
+    }
+    
+    private Cart createCart(Long userId) {
+        Cart cart = new Cart();
+        cart.setUserId(userId);
+        cart.setCreateTime(LocalDateTime.now());
+        cart.setUpdateTime(LocalDateTime.now());
+        cartMapper.insert(cart);
+        return cart;
     }
     
     private CartItemResponse convertToResponse(CartItem item) {
