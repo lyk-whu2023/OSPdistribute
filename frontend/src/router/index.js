@@ -39,6 +39,30 @@ const routes = [
     path: '/seckill',
     name: 'Seckill',
     component: () => import('@/views/SeckillView.vue')
+  },
+  {
+    path: '/cart',
+    name: 'Cart',
+    component: () => import('@/views/CartView.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/order/submit',
+    name: 'OrderSubmit',
+    component: () => import('@/views/OrderSubmitView.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/orders',
+    name: 'OrderList',
+    component: () => import('@/views/OrderListView.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/order/:id',
+    name: 'OrderDetail',
+    component: () => import('@/views/OrderDetailView.vue'),
+    meta: { requiresAuth: true }
   }
 ]
 
