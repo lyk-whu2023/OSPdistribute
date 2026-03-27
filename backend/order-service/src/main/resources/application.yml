@@ -9,13 +9,49 @@ spring:
   main:
     web-application-type: reactive
   cloud:
-    config:
-      enabled: false
-  eureka:
-    client:
-      enabled: false
-    instance:
-      prefer-ip-address: true
+    nacos:
+      discovery:
+        server-addr: localhost:8848
+        enabled: true
+      config:
+        server-addr: localhost:8848
+        file-extension: yaml
+        enabled: true
+        shared-configs:
+          - data-id: common-config.yaml
+            refresh: true
+    sentinel:
+      transport:
+        dashboard: localhost:8080
+        port: 8719
+      datasource:
+        ds1:
+          nacos:
+            server-addr: localhost:8848
+            dataId: ${spring.application.name}-sentinel.json
+            groupId: DEFAULT_GROUP
+            rule-type: flow
+    seata:
+      enabled: true
+      application-id: ${spring.application.name}
+      tx-service-group: default_tx_group
+      service:
+        vgroup-mapping:
+          default_tx_group: default
+        grouplist:
+          default: localhost:8091
+      config:
+        type: nacos
+        nacos:
+          server-addr: localhost:8848
+          group: SEATA_GROUP
+          data-id: seataServer.properties
+      registry:
+        type: nacos
+        nacos:
+          server-addr: localhost:8848
+          group: SEATA_GROUP
+          namespace: 
   datasource:
     url: jdbc:mysql://localhost:3306/order_db?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai
     username: root

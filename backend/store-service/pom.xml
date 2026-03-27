@@ -18,16 +18,22 @@
     <description>店铺服务</description>
     
     <dependencies>
-        <!-- Eureka 客户端 - 服务注册与发现 -->
+        <!-- Nacos 服务注册与发现 -->
         <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
         </dependency>
         
-        <!-- Config 客户端 - 配置中心 -->
+        <!-- Nacos 配置中心 -->
         <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-config</artifactId>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
+        </dependency>
+        
+        <!-- Sentinel 流量控制与熔断降级 -->
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-sentinel</artifactId>
         </dependency>
         
         <!-- Bootstrap 支持 -->

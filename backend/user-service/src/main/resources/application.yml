@@ -9,14 +9,49 @@ spring:
   profiles:
     active: dev
   cloud:
-    config:
-      enabled: false
-  # eureka相关配置方便测试，实际环境需要注释
-  eureka:
-    client:
-      enabled: false
-    instance:
-      prefer-ip-address: true
+    nacos:
+      discovery:
+        server-addr: localhost:8848
+        enabled: true
+      config:
+        server-addr: localhost:8848
+        file-extension: yaml
+        enabled: true
+        shared-configs:
+          - data-id: common-config.yaml
+            refresh: true
+    sentinel:
+      transport:
+        dashboard: localhost:8080
+        port: 8719
+      datasource:
+        ds1:
+          nacos:
+            server-addr: localhost:8848
+            dataId: ${spring.application.name}-sentinel.json
+            groupId: DEFAULT_GROUP
+            rule-type: flow
+    seata:
+      enabled: true
+      application-id: ${spring.application.name}
+      tx-service-group: default_tx_group
+      service:
+        vgroup-mapping:
+          default_tx_group: default
+        grouplist:
+          default: localhost:8091
+      config:
+        type: nacos
+        nacos:
+          server-addr: localhost:8848
+          group: SEATA_GROUP
+          data-id: seataServer.properties
+      registry:
+        type: nacos
+        nacos:
+          server-addr: localhost:8848
+          group: SEATA_GROUP
+          namespace: 
   datasource:
     url: jdbc:mysql://localhost:3306/user_db?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai
     username: root
@@ -47,14 +82,6 @@ mybatis-plus:
   configuration:
     map-underscore-to-camel-case: true
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
-
-# eureka:
-#   client:
-#     service-url:
-#       defaultZone: http://localhost:8761/eureka/
-#   instance:
-#     prefer-ip-address: true
-#     instance-id: ${spring.application.name}:${server.port}
 
 jwt:
   secret: YxtrduwQ7U2jEJMH96bgmyLvnP8e3qTNVaKSWFfRhDCcXkBz

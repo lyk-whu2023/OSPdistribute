@@ -2,8 +2,8 @@ spring:
   application:
     name: product-service
   cloud:
-    config:
-      enabled: true
-      uri: http://localhost:8888
-      profile: dev
-      label: main
+    nacos:
+      config:
+        server-addr: localhost:8848
+        file-extension: yaml
+        prefix: ${spring.application.name}
