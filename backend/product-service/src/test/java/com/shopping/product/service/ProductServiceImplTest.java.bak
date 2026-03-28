@@ -1,0 +1,170 @@
+package com.shopping.product.service;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.shopping.product.dto.request.ProductRequest;
+import com.shopping.product.dto.response.ProductResponse;
+import com.shopping.product.entity.Product;
+import com.shopping.product.mapper.ProductMapper;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.kafka.core.KafkaTemplate;
+
+import java.math.BigDecimal;
+import java.util.concurrent.TimeUnit;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+
+@ExtendWith(MockitoExtension.class)
+class ProductServiceImplTest {
+
+    @Mock
+    private ProductMapper productMapper;
+
+    @Mock
+    private RedisTemplate<String, Object> redisTemplate;
+
+    @Mock
+    private KafkaTemplate<String, String> kafkaTemplate;
+
+    @Mock
+    private ObjectMapper objectMapper;
+
+    @Mock
+    private ValueOperations<String, Object> valueOperations;
+
+    @InjectMocks
+    private ProductServiceImpl productService;
+
+    @BeforeEach
+    void setUp() {
+        // 使用 lenient 避免严格 stubbing 验证
+        lenient().when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+        lenient().when(valueOperations.get(anyString())).thenReturn(null);
+        lenient().doNothing().when(redisTemplate).delete(anyString());
+        lenient().doNothing().when(valueOperations).set(anyString(), any(), anyLong(), any(TimeUnit.class));
+        lenient().when(kafkaTemplate.send(anyString(), anyString())).thenReturn(null);
+    }
+
+    @Test
+    void testGetProductById_CacheMiss() {
+        Long productId = 2L;
+        Product dbProduct = new Product();
+        dbProduct.setId(productId);
+        dbProduct.setName("DB Product");
+        dbProduct.setPrice(new BigDecimal("199.99"));
+        dbProduct.setStatus(1);
+
+        when(productMapper.selectById(productId)).thenReturn(dbProduct);
+
+        ProductResponse response = productService.getProductById(productId);
+
+        assertNotNull(response);
+        assertEquals(productId, response.getId());
+        verify(productMapper).selectById(productId);
+    }
+
+    @Test
+    void testGetProductById_NotFound() {
+        Long productId = 3L;
+
+        when(productMapper.selectById(productId)).thenReturn(null);
+
+        assertThrows(RuntimeException.class, () -> productService.getProductById(productId));
+    }
+
+    @Test
+    void testCreateProduct() {
+        ProductRequest request = new ProductRequest();
+        request.setName("New Product");
+        request.setPrice(new BigDecimal("299.99"));
+        request.setStoreId(1L);
+        request.setCategoryId(1L);
+        request.setStock(100);
+
+        when(productMapper.insert(any(Product.class))).thenAnswer(invocation -> {
+            Product p = invocation.getArgument(0);
+            p.setId(100L);
+            return 1;
+        });
+
+        ProductResponse response = productService.createProduct(request);
+
+        assertNotNull(response);
+        assertEquals(100L, response.getId());
+        assertEquals("New Product", response.getName());
+        verify(productMapper).insert(any(Product.class));
+    }
+
+    @Test
+    void testUpdateProduct() {
+        Long productId = 1L;
+        ProductRequest request = new ProductRequest();
+        request.setName("Updated Product");
+        request.setPrice(new BigDecimal("399.99"));
+
+        Product existingProduct = new Product();
+        existingProduct.setId(productId);
+        existingProduct.setName("Old Product");
+        existingProduct.setPrice(new BigDecimal("299.99"));
+
+        when(productMapper.selectById(productId)).thenReturn(existingProduct);
+        when(productMapper.updateById(any(Product.class))).thenReturn(1);
+
+        ProductResponse response = productService.updateProduct(productId, request);
+
+        assertNotNull(response);
+        assertEquals("Updated Product", existingProduct.getName());
+        verify(productMapper).selectById(productId);
+        verify(productMapper).updateById(existingProduct);
+    }
+
+    @Test
+    void testDeleteProduct() {
+        Long productId = 1L;
+        doNothing().when(productMapper).deleteById(productId);
+
+        assertDoesNotThrow(() -> productService.deleteProduct(productId));
+        verify(productMapper).deleteById(productId);
+    }
+
+    @Test
+    void testUpdateStock_Success() {
+        Long productId = 1L;
+        Integer quantity = 5;
+
+        Product product = new Product();
+        product.setId(productId);
+        product.setStock(100);
+        product.setSales(50);
+
+        when(productMapper.selectById(productId)).thenReturn(product);
+        when(productMapper.updateById(any(Product.class))).thenReturn(1);
+
+        assertDoesNotThrow(() -> productService.updateStock(productId, quantity));
+        assertEquals(95, product.getStock());
+        assertEquals(55, product.getSales());
+        verify(productMapper).updateById(product);
+    }
+
+    @Test
+    void testUpdateStock_InsufficientStock() {
+        Long productId = 1L;
+        Integer quantity = 200;
+
+        Product product = new Product();
+        product.setId(productId);
+        product.setStock(100);
+
+        when(productMapper.selectById(productId)).thenReturn(product);
+
+        assertThrows(RuntimeException.class, () -> productService.updateStock(productId, quantity));
+    }
+}

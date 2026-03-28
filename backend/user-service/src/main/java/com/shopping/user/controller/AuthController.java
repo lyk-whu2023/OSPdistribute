@@ -2,12 +2,13 @@ package com.shopping.user.controller;
 
 import com.shopping.user.dto.request.LoginRequest;
 import com.shopping.user.dto.request.RegisterRequest;
+import com.shopping.user.dto.response.LoginResponse;
 import com.shopping.user.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
-@RestController//@Controller 和 @ResponseBody 组合注解
-@RequestMapping("/api/auth")
+@RestController
+@RequestMapping("/auth")
 @RequiredArgsConstructor
 public class AuthController {
     private final AuthService authService;
@@ -18,7 +19,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public String login(@RequestBody LoginRequest request) {
+    public LoginResponse login(@RequestBody LoginRequest request) {
         return authService.login(request);
     }
 

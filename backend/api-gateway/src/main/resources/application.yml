@@ -1,0 +1,132 @@
+server:
+  port: 9999
+
+spring:
+  application:
+    name: api-gateway
+  profiles:
+    active: dev
+  cloud:
+    nacos:
+      discovery:
+        server-addr: localhost:8848
+        enabled: true
+        heartbeat-interval: 5000
+        heartbeat-timeout: 15000
+        ip-delete-timeout: 30000
+      config:
+        server-addr: localhost:8848
+        file-extension: yaml
+        enabled: true
+        shared-configs:
+          - data-id: common-config.yaml
+            refresh: true
+    gateway:
+      discovery:
+        locator:
+          enabled: false
+          lower-case-service-id: true
+      routes:
+        - id: user-service
+          uri: lb://user-service
+          predicates:
+            - Path=/api/users/**,/api/auth/**
+          filters:
+            - StripPrefix=1
+        - id: product-service
+          uri: lb://product-service
+          predicates:
+            - Path=/api/products/**,/api/categories/**,/api/seckill/**
+          filters:
+            - StripPrefix=1
+        - id: order-service
+          uri: lb://order-service
+          predicates:
+            - Path=/api/orders/**
+          filters:
+            - StripPrefix=1
+        - id: payment-service
+          uri: lb://payment-service
+          predicates:
+            - Path=/api/payments/**
+          filters:
+            - StripPrefix=1
+        - id: shipment-service
+          uri: lb://shipment-service
+          predicates:
+            - Path=/api/shipments/**
+          filters:
+            - StripPrefix=1
+        - id: comment-service
+          uri: lb://comment-service
+          predicates:
+            - Path=/api/comments/**
+          filters:
+            - StripPrefix=1
+        - id: stats-service
+          uri: lb://stats-service
+          predicates:
+            - Path=/api/stats/**
+          filters:
+            - StripPrefix=1
+        - id: blog-service
+          uri: lb://blog-service
+          predicates:
+            - Path=/api/blogs/**
+          filters:
+            - StripPrefix=1
+        - id: sms-service
+          uri: lb://sms-service
+          predicates:
+            - Path=/api/sms/**
+          filters:
+            - StripPrefix=1
+        - id: store-service
+          uri: lb://store-service
+          predicates:
+            - Path=/api/stores/**
+          filters:
+            - StripPrefix=1
+      default-filters:
+        - name: Retry
+          args:
+            retries: 3
+            statuses: BAD_GATEWAY
+            methods: GET
+            backoff:
+              firstBackoff: 10ms
+              maxBackoff: 50ms
+              factor: 2
+              basedOnPreviousValue: false
+    httpclient:
+      connect-timeout: 10000
+      response-timeout: 30000ms
+    sentinel:
+      enabled: false
+      transport:
+        dashboard: localhost:8080
+        port: 8719
+  main:
+    web-application-type: reactive
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always
+    gateway:
+      enabled: true
+  health:
+    circuitbreakers:
+      enabled: true
+  security:
+    enabled: false
+
+logging:
+  level:
+    root: INFO
+    org.springframework.cloud.gateway: DEBUG
+    com.alibaba.cloud.sentinel: DEBUG

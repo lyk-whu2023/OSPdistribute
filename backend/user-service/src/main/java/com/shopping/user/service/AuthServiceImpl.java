@@ -3,6 +3,8 @@ package com.shopping.user.service;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.shopping.user.dto.request.LoginRequest;
 import com.shopping.user.dto.request.RegisterRequest;
+import com.shopping.user.dto.response.LoginResponse;
+import com.shopping.user.dto.response.UserResponse;
 import com.shopping.user.entity.User;
 import com.shopping.user.mapper.UserMapper;
 import com.shopping.user.util.JwtUtil;
@@ -12,6 +14,7 @@ import java.time.LocalDateTime;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -56,7 +59,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public String login(LoginRequest request) {
+    public LoginResponse login(LoginRequest request) {
         validateLoginRequest(request);
         
         User user = userMapper.selectOne(new LambdaQueryWrapper<User>()
@@ -77,7 +80,15 @@ public class AuthServiceImpl implements AuthService {
         operationLogService.logLogin(user.getId(), user.getUsername(), "", "成功");
         log.info("用户登录成功：{}", user.getUsername());
         
-        return token;
+        // 构建响应对象
+        LoginResponse response = new LoginResponse();
+        response.setToken(token);
+        
+        UserResponse userResponse = new UserResponse();
+        BeanUtils.copyProperties(user, userResponse);
+        response.setUser(userResponse);
+        
+        return response;
     }
 
     @Override

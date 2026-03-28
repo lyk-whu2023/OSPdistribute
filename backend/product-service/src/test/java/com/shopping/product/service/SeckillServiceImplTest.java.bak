@@ -1,0 +1,87 @@
+package com.shopping.product.service;
+
+import com.shopping.product.dto.request.SeckillProductRequest;
+import com.shopping.product.dto.response.SeckillProductResponse;
+import com.shopping.product.entity.SeckillProduct;
+import com.shopping.product.mapper.SeckillProductMapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.kafka.core.KafkaTemplate;
+
+import java.math.BigDecimal;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+
+class SeckillServiceImplTest {
+
+    @Mock
+    private SeckillProductMapper seckillProductMapper;
+
+    @Mock
+    private RedisTemplate<String, Object> redisTemplate;
+
+    @Mock
+    private KafkaTemplate<String, String> kafkaTemplate;
+
+    @Mock
+    private ObjectMapper objectMapper;
+
+    @Mock
+    private ValueOperations<String, Object> valueOperations;
+
+    @InjectMocks
+    private SeckillServiceImpl seckillService;
+
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+        // 使用 lenient 避免严格 stubbing 验证
+        lenient().when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+        lenient().when(valueOperations.get(anyString())).thenReturn(null);
+        lenient().doNothing().when(redisTemplate).delete(anyString());
+        lenient().when(valueOperations.setIfAbsent(anyString(), any(), anyLong(), any(TimeUnit.class))).thenReturn(true);
+        lenient().when(valueOperations.decrement(anyString())).thenReturn(99L);
+        lenient().when(kafkaTemplate.send(anyString(), anyString())).thenReturn(CompletableFuture.completedFuture(null));
+    }
+
+    @Test
+    void testCreateSeckillProduct() {
+        SeckillProductRequest request = new SeckillProductRequest();
+        request.setActivityId(1L);
+        request.setProductId(2L);
+        request.setSeckillPrice(new BigDecimal("9.99"));
+        request.setStock(100);
+
+        SeckillProduct savedProduct = new SeckillProduct();
+        savedProduct.setId(10L);
+        savedProduct.setActivityId(1L);
+        savedProduct.setProductId(2L);
+        savedProduct.setSeckillPrice(new BigDecimal("9.99"));
+        savedProduct.setStock(100);
+        savedProduct.setSold(0);
+        savedProduct.setStatus(1);
+
+        when(seckillProductMapper.insert(any(SeckillProduct.class))).thenAnswer(invocation -> {
+            SeckillProduct p = invocation.getArgument(0);
+            p.setId(10L);
+            return 1;
+        });
+
+        SeckillProductResponse response = seckillService.createSeckillProduct(request);
+
+        assertNotNull(response);
+        assertEquals(10L, response.getId());
+        assertEquals(new BigDecimal("9.99"), response.getSeckillPrice());
+        verify(seckillProductMapper).insert(any(SeckillProduct.class));
+    }
+}

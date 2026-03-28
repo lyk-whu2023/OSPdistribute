@@ -41,6 +41,12 @@
             <artifactId>spring-cloud-starter-alibaba-sentinel</artifactId>
         </dependency>
         
+        <!-- Sentinel Nacos 数据源 -->
+        <dependency>
+            <groupId>com.alibaba.csp</groupId>
+            <artifactId>sentinel-datasource-nacos</artifactId>
+        </dependency>
+        
         <!-- Seata 分布式事务 -->
         <dependency>
             <groupId>com.alibaba.cloud</groupId>
@@ -72,10 +78,16 @@
             <artifactId>mybatis-plus-boot-starter</artifactId>
         </dependency>
         
-        <!-- Redis -->
+        <!-- Redis - 缓存 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-redis</artifactId>
+        </dependency>
+        
+        <!-- Lettuce Redis 客户端 -->
+        <dependency>
+            <groupId>io.lettuce</groupId>
+            <artifactId>lettuce-core</artifactId>
         </dependency>
         
         <!-- Kafka -->
