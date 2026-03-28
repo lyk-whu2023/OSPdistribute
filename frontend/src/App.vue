@@ -1,11 +1,14 @@
 <template>
   <div id="app">
-    <router-view />
+    <Navbar />
+    <main class="main-content">
+      <router-view />
+    </main>
   </div>
 </template>
 
 <script setup>
-// App.vue
+import Navbar from '@/components/Navbar.vue'
 </script>
 
 <style>
@@ -24,5 +27,9 @@
 
 body {
   background-color: #f5f5f5;
+}
+
+.main-content {
+  min-height: calc(100vh - 60px);
 }
 </style>

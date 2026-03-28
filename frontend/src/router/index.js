@@ -63,6 +63,38 @@ const routes = [
     name: 'OrderDetail',
     component: () => import('@/views/OrderDetailView.vue'),
     meta: { requiresAuth: true }
+  },
+  {
+    path: '/blog',
+    name: 'Blog',
+    component: () => import('@/views/BlogView.vue')
+  },
+  {
+    path: '/blog/:id',
+    name: 'BlogDetail',
+    component: () => import('@/views/BlogDetailView.vue')
+  },
+  {
+    path: '/blog/create',
+    name: 'BlogCreate',
+    component: () => import('@/views/BlogCreateView.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/stores',
+    name: 'Stores',
+    component: () => import('@/views/StoreView.vue')
+  },
+  {
+    path: '/store/:id',
+    name: 'StoreDetail',
+    component: () => import('@/views/StoreDetailView.vue')
+  },
+  {
+    path: '/favorites',
+    name: 'Favorites',
+    component: () => import('@/views/FavoritesView.vue'),
+    meta: { requiresAuth: true }
   }
 ]
 

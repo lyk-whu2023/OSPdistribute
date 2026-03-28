@@ -4,8 +4,8 @@
       <!-- 左侧图片 -->
       <el-col :span="12">
         <el-card>
-          <el-carousel height="400px" v-if="product.images?.length">
-            <el-carousel-item v-for="image in product.images" :key="image.id">
+          <el-carousel height="500px" v-if="product.images?.length > 0 || product.id">
+            <el-carousel-item v-for="image in displayImages" :key="image.id || image.imageUrl">
               <img :src="image.imageUrl" class="product-image" alt="商品图片" />
             </el-carousel-item>
           </el-carousel>
@@ -78,6 +78,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useProductStore } from '@/store/modules/product'
 import { useUserStore } from '@/store/modules/user'
+import { generateMultipleProductImages } from '@/utils/image'
 import { ElMessage } from 'element-plus'
 
 const route = useRoute()
@@ -87,6 +88,17 @@ const userStore = useUserStore()
 
 const quantity = ref(1)
 const product = ref({})
+
+const displayImages = computed(() => {
+  if (product.value.images && product.value.images.length > 0) {
+    return product.value.images
+  }
+  // 如果没有图片，生成随机图片
+  if (product.value.id) {
+    return generateMultipleProductImages(3, 800, 800, product.value.id)
+  }
+  return []
+})
 
 onMounted(async () => {
   const productId = route.params.id
@@ -143,7 +155,7 @@ const buyNow = () => {
 
 .product-image {
   width: 100%;
-  height: 400px;
+  height: 500px;
   object-fit: cover;
 }
 

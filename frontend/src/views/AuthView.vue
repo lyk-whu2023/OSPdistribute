@@ -130,9 +130,10 @@ const handleLogin = async () => {
     const response = await userStore.login(loginForm)
     ElMessage.success('登录成功')
     
-    // 获取用户信息
-    const userId = response.userId || response.id
-    if (userId) {
+    // 登录响应已包含用户信息，无需再次获取
+    // 如果响应中没有用户信息，则调用 getUserInfo
+    if (!userStore.userId && (response.userId || response.id)) {
+      const userId = response.userId || response.id
       await userStore.getUserInfo(userId)
     }
     

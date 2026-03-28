@@ -52,20 +52,22 @@
             :lg="4"
           >
             <el-card class="product-card" shadow="hover" @click="goToDetail(product.id)">
-              <img
-                :src="product.images?.[0]?.imageUrl || '/placeholder.png'"
-                class="product-image"
-                alt="商品图片"
-              />
+              <div class="product-image-wrapper">
+                <img
+                  :src="product.images?.[0]?.imageUrl || getProductImage(product.id)"
+                  class="product-image"
+                  :alt="product.name"
+                />
+              </div>
               <div class="product-info">
                 <h3 class="product-name">{{ product.name }}</h3>
-                <p class="product-desc">{{ product.description }}</p>
+                <p class="product-desc">{{ product.description || '暂无描述' }}</p>
                 <div class="product-price">
                   <span class="current-price">¥{{ product.price }}</span>
                 </div>
                 <div class="product-meta">
-                  <span>销量: {{ product.sales }}</span>
-                  <span>库存: {{ product.stock }}</span>
+                  <span>销量：{{ product.sales || 0 }}</span>
+                  <span>库存：{{ product.stock || 0 }}</span>
                 </div>
               </div>
             </el-card>
@@ -94,6 +96,7 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { Search } from '@element-plus/icons-vue'
 import { useProductStore } from '@/store/modules/product'
+import { getProductImageBySeed } from '@/utils/image'
 import { ElMessage } from 'element-plus'
 
 const router = useRouter()
@@ -113,6 +116,10 @@ const treeProps = {
 
 const categoryTree = computed(() => productStore.categoryTree)
 const productList = computed(() => productStore.products)
+
+const getProductImage = (productId) => {
+  return getProductImageBySeed(productId, 400, 400)
+}
 
 onMounted(async () => {
   await productStore.loadCategories()
@@ -190,17 +197,29 @@ watch(() => route.query.categoryId, (newVal) => {
 .product-card {
   margin-bottom: 20px;
   cursor: pointer;
-  transition: transform 0.3s;
+  transition: all 0.3s;
 }
 
 .product-card:hover {
   transform: translateY(-5px);
 }
 
+.product-image-wrapper {
+  width: 100%;
+  height: 250px;
+  overflow: hidden;
+  border-radius: 4px;
+}
+
 .product-image {
   width: 100%;
-  height: 200px;
+  height: 100%;
   object-fit: cover;
+  transition: transform 0.3s;
+}
+
+.product-card:hover .product-image {
+  transform: scale(1.1);
 }
 
 .product-info {

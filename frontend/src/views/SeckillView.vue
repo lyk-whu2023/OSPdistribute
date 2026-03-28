@@ -87,7 +87,7 @@
                 <el-button
                   type="danger"
                   size="large"
-                  @click="purchaseSeckill(product)"
+                  @click="handlePurchaseSeckill(product)"
                   :disabled="product.seckillStock === 0 || !canPurchase"
                   :loading="purchasing[product.id]"
                 >
@@ -206,7 +206,7 @@ const startCountdown = () => {
   }, 1000)
 }
 
-const purchaseSeckill = async (product) => {
+const handlePurchaseSeckill = async (product) => {
   if (!userStore.isLoggedIn) {
     ElMessage.warning('请先登录')
     return
