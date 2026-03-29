@@ -2,16 +2,16 @@ import request from '@/utils/request'
 
 export function getCartItems(userId) {
   return request({
-    url: `/api/cart/user/${userId}`,
+    url: `/api/cart/${userId}/items`,
     method: 'get'
   })
 }
 
-export function addToCart(userId, productId, skuId, quantity, price) {
+export function addToCart(userId, productId, skuId, quantity, price, productName = '') {
   return request({
-    url: `/api/cart/user/${userId}/items`,
+    url: `/api/cart/${userId}/items`,
     method: 'post',
-    params: { productId, skuId, quantity, price }
+    data: { productId, skuId, quantity, price, productName }
   })
 }
 
@@ -19,7 +19,7 @@ export function updateCartItem(cartItemId, quantity) {
   return request({
     url: `/api/cart/items/${cartItemId}`,
     method: 'put',
-    params: { quantity }
+    data: { quantity }
   })
 }
 
@@ -32,7 +32,7 @@ export function removeCartItem(cartItemId) {
 
 export function clearCart(userId) {
   return request({
-    url: `/api/cart/user/${userId}`,
+    url: `/api/cart/${userId}`,
     method: 'delete'
   })
 }
@@ -41,7 +41,11 @@ export function getUserOrders(userId, params = {}) {
   return request({
     url: `/api/orders/user/${userId}`,
     method: 'get',
-    params
+    params: {
+      page: params.page || 1,
+      size: params.size || 10,
+      ...params
+    }
   })
 }
 
@@ -60,15 +64,26 @@ export function getOrderByOrderNo(orderNo) {
 }
 
 export function createOrder(data) {
+  console.log('=== 调用 createOrder API ===')
+  console.log('请求数据:', data)
   return request({
     url: '/api/orders',
     method: 'post',
-    params: {
+    data: {
       userId: data.userId,
       addressId: data.addressId,
-      storeId: data.storeId
-    },
-    data: data.items
+      storeId: data.storeId,
+      items: data.items
+    }
+  }).then(response => {
+    console.log('订单创建成功:', response)
+    return response
+  }).catch(error => {
+    console.error('=== 订单创建失败 ===')
+    console.error('错误状态码:', error.response?.status)
+    console.error('错误信息:', error.response?.data)
+    console.error('请求配置:', error.config)
+    throw error
   })
 }
 
@@ -76,13 +91,20 @@ export function updateOrderStatus(id, status) {
   return request({
     url: `/api/orders/${id}/status`,
     method: 'put',
-    params: { status }
+    data: { status }
   })
 }
 
 export function cancelOrder(id) {
   return request({
     url: `/api/orders/${id}/cancel`,
-    method: 'put'
+    method: 'post'
+  })
+}
+
+export function getOrderDetail(id) {
+  return request({
+    url: `/api/orders/${id}/detail`,
+    method: 'get'
   })
 }

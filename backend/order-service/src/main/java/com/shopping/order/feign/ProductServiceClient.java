@@ -7,6 +7,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 @FeignClient(name = "product-service")
 public interface ProductServiceClient {
     
-    @PutMapping("/api/products/{productId}/stock/{quantity}")
+    @PutMapping("/products/{productId}/stock/{quantity}")
     void updateStock(@PathVariable Long productId, @PathVariable Integer quantity);
 }

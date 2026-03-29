@@ -82,6 +82,26 @@ public class JwtUtil {
         // 从 subject 中获取用户 ID 并转换为 Long 类型
         return Long.parseLong(claims.getSubject());
     }
+    
+    /**
+     * 获取 Token 过期时间
+     * @param token JWT 令牌
+     * @return 过期时间戳（毫秒），如果解析失败返回 null
+     */
+    public Long getExpireTime(String token) {
+        try {
+            Claims claims = Jwts.parser()
+                    .verifyWith(getSigningKey())
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload();
+            
+            Date expiryDate = claims.getExpiration();
+            return expiryDate != null ? expiryDate.getTime() : null;
+        } catch (Exception e) {
+            return null;
+        }
+    }
 
     /**
      * 验证令牌有效性

@@ -18,6 +18,8 @@ public class CartItem {
     
     private Long skuId;
     
+    private String productName;
+    
     private Integer quantity;
     
     private BigDecimal price;

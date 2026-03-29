@@ -11,7 +11,7 @@ public interface CartService {
     
     List<CartItemResponse> getCartItems(Long userId);
     
-    void addToCart(Long userId, Long productId, Long skuId, Integer quantity, String productName, String skuName, BigDecimal price);
+    void addToCart(Long userId, Long productId, Long skuId, Integer quantity, String productName, BigDecimal price);
     
     void updateCartItem(Long cartItemId, Integer quantity);
     

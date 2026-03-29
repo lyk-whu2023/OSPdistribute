@@ -127,20 +127,24 @@ const handleLogin = async () => {
   try {
     await loginFormRef.value.validate()
     loading.value = true
+    
+    // 添加调试日志
+    console.log('登录表单数据:', loginForm)
+    
     const response = await userStore.login(loginForm)
     ElMessage.success('登录成功')
     
     // 登录响应已包含用户信息，无需再次获取
     // 如果响应中没有用户信息，则调用 getUserInfo
-    if (!userStore.userId && (response.userId || response.id)) {
-      const userId = response.userId || response.id
-      await userStore.getUserInfo(userId)
+    if (!userStore.userId && response.user?.id) {
+      await userStore.getUserInfo(response.user.id)
     }
     
     // 跳转到首页或重定向页面
     const redirect = router.currentRoute.value.query.redirect
     router.push(redirect || '/')
   } catch (error) {
+    console.error('登录错误:', error)
     ElMessage.error(error.response?.data?.message || '登录失败')
   } finally {
     loading.value = false

@@ -19,6 +19,7 @@ CREATE TABLE IF NOT EXISTS `cart_items` (
     `cart_id` BIGINT NOT NULL COMMENT '购物车 ID',
     `product_id` BIGINT NOT NULL COMMENT '商品 ID',
     `sku_id` BIGINT DEFAULT NULL COMMENT '商品规格 ID',
+    `product_name` VARCHAR(100) DEFAULT NULL COMMENT '商品名称',
     `quantity` INT NOT NULL DEFAULT 1 COMMENT '商品数量',
     `price` DECIMAL(10,2) NOT NULL COMMENT '商品价格',
     `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',

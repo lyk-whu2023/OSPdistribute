@@ -46,9 +46,15 @@ request.interceptors.response.use(
     if (error.response) {
       switch (error.response.status) {
         case 401:
+          console.error('=== 401 错误 ===')
+          console.error('请求 URL:', error.config.url)
+          console.error('请求方法:', error.config.method)
+          console.error('请求头:', error.config.headers)
+          console.error('响应数据:', error.response.data)
           ElMessage.error('未授权，请登录')
-          removeToken()
-          window.location.href = '/auth'
+          // 暂时禁用自动跳转，先调试
+          // removeToken()
+          // window.location.href = '/auth'
           break
         case 403:
           ElMessage.error('拒绝访问')

@@ -106,11 +106,33 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   const userStore = useUserStore()
   
+  console.log('=== 路由守卫 ===')
+  console.log('to.path:', to.path)
+  console.log('to.meta.requiresAuth:', to.meta.requiresAuth)
+  console.log('userStore.isLoggedIn:', userStore.isLoggedIn)
+  console.log('userStore.userId:', userStore.userId)
+  console.log('userStore.token:', userStore.token ? '存在' : '不存在')
+  
   if (to.meta.requiresAuth && !userStore.isLoggedIn) {
+    console.log('未登录，跳转到登录页')
     next({ name: 'Auth', query: { redirect: to.fullPath } })
   } else {
+    console.log('允许访问')
     next()
   }
 })
+
+// 监听 token 失效事件，处理页面跳转
+if (typeof window !== 'undefined') {
+  window.addEventListener('token-expired', () => {
+    const currentRoute = router.currentRoute.value
+    if (currentRoute && currentRoute.meta.requiresAuth) {
+      router.push({
+        name: 'Auth',
+        query: { redirect: currentRoute.fullPath }
+      })
+    }
+  })
+}
 
 export default router

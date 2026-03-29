@@ -13,7 +13,7 @@
               <el-radio
                 v-for="address in addressList"
                 :key="address.id"
-                :label="address.id"
+                :value="address.id"
                 class="address-item"
               >
                 <div class="address-content">
@@ -128,12 +128,23 @@ onMounted(async () => {
 
 const loadAddresses = async () => {
   try {
+    // 确保 userId 存在
+    if (!userStore.userId) {
+      ElMessage.error('用户未登录')
+      addressList.value = []
+      // 跳转到登录页
+      setTimeout(() => {
+        router.push({ name: 'Auth', query: { redirect: '/order/submit' } })
+      }, 1000)
+      return
+    }
     addressList.value = await getUserAddresses(userStore.userId)
     if (addressList.value.length > 0) {
       const defaultAddress = addressList.value.find(a => a.isDefault === 1)
       selectedAddressId.value = defaultAddress ? defaultAddress.id : addressList.value[0].id
     }
   } catch (error) {
+    console.error('加载地址失败', error)
     ElMessage.error('加载地址失败')
   }
 }
@@ -167,12 +178,13 @@ const handleSubmitOrder = async () => {
         productId: item.productId,
         skuId: item.skuId,
         productName: item.productName,
-        skuName: item.skuName,
         price: item.price,
         quantity: item.quantity
       }))
     }
 
+    console.log('提交订单数据:', JSON.stringify(orderData, null, 2))
+    
     const order = await createOrder(orderData)
     
     ElMessage.success('订单创建成功')

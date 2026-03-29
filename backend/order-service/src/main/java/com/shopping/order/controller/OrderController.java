@@ -8,57 +8,65 @@ import com.shopping.order.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import reactor.core.publisher.Mono;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/orders")
+@RequestMapping("/orders")
 @RequiredArgsConstructor
 public class OrderController {
     
     private final OrderService orderService;
     
     @PostMapping
-    public Mono<ResponseEntity<OrderResponse>> createOrder(@RequestBody CreateOrderRequest request) {
+    public ResponseEntity<OrderResponse> createOrder(@RequestBody CreateOrderRequest request) {
+        System.out.println("=== 收到订单创建请求 ===");
+        System.out.println("userId: " + request.getUserId());
+        System.out.println("addressId: " + request.getAddressId());
+        System.out.println("storeId: " + request.getStoreId());
+        System.out.println("items 数量：" + request.getItems().size());
+        for (var item : request.getItems()) {
+            System.out.println("  - productId: " + item.getProductId() + ", productName: " + item.getProductName() + ", price: " + item.getPrice() + ", quantity: " + item.getQuantity());
+        }
+        
         OrderResponse response = orderService.createOrder(
             request.getUserId(),
             request.getAddressId(),
             request.getStoreId(),
             request.getItems()
         );
-        return Mono.just(ResponseEntity.ok(response));
+        return ResponseEntity.ok(response);
     }
     
     @GetMapping("/{id}")
-    public Mono<ResponseEntity<OrderResponse>> getOrderById(@PathVariable Long id) {
-        return Mono.just(ResponseEntity.ok(orderService.getOrderById(id)));
+    public ResponseEntity<OrderResponse> getOrderById(@PathVariable Long id) {
+        return ResponseEntity.ok(orderService.getOrderById(id));
     }
     
     @GetMapping("/{id}/detail")
-    public Mono<ResponseEntity<OrderDetailResponse>> getOrderDetailById(@PathVariable Long id) {
-        return Mono.just(ResponseEntity.ok(orderService.getOrderDetailById(id)));
+    public ResponseEntity<OrderDetailResponse> getOrderDetailById(@PathVariable Long id) {
+        return ResponseEntity.ok(orderService.getOrderDetailById(id));
     }
     
     @GetMapping("/user/{userId}")
-    public Mono<ResponseEntity<List<OrderResponse>>> getUserOrders(
+    public ResponseEntity<List<OrderResponse>> getUserOrders(
             @PathVariable Long userId,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size) {
-        return Mono.just(ResponseEntity.ok(orderService.getUserOrders(userId, page, size)));
+        return ResponseEntity.ok(orderService.getUserOrders(userId, page, size));
     }
     
     @PutMapping("/{id}/status")
-    public Mono<ResponseEntity<Void>> updateOrderStatus(
+    public ResponseEntity<Void> updateOrderStatus(
             @PathVariable Long id,
             @RequestBody UpdateOrderStatusRequest request) {
         orderService.updateOrderStatus(id, request.getStatus());
-        return Mono.just(ResponseEntity.ok().build());
+        return ResponseEntity.ok().build();
     }
     
     @PostMapping("/{id}/cancel")
-    public Mono<ResponseEntity<Void>> cancelOrder(@PathVariable Long id) {
+    public ResponseEntity<Void> cancelOrder(@PathVariable Long id) {
         orderService.cancelOrder(id);
-        return Mono.just(ResponseEntity.ok().build());
+        return ResponseEntity.ok().build();
     }
 }

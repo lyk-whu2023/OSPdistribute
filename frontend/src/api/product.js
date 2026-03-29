@@ -151,6 +151,19 @@ export function deleteProduct(id) {
 }
 
 /**
+ * 更新商品库存
+ * @param {number} productId - 商品 ID
+ * @param {number} quantity - 库存变化数量
+ * @returns {Promise}
+ */
+export function updateProductStock(productId, quantity) {
+  return request({
+    url: `/api/products/${productId}/stock/${quantity}`,
+    method: 'put'
+  })
+}
+
+/**
  * 获取秒杀活动列表
  * @returns {Promise}
  */
@@ -196,5 +209,18 @@ export function purchaseSeckill(id, userId) {
     url: `/api/seckill/products/${id}/purchase`,
     method: 'post',
     params: { userId }
+  })
+}
+
+/**
+ * 创建秒杀商品
+ * @param {Object} data - 秒杀商品信息
+ * @returns {Promise}
+ */
+export function createSeckillProduct(data) {
+  return request({
+    url: '/api/seckill/products',
+    method: 'post',
+    data
   })
 }

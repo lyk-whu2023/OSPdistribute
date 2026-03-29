@@ -115,11 +115,23 @@ onMounted(async () => {
 
 const loadOrders = async (status = '') => {
   try {
+    // 确保 userId 存在
+    if (!userStore.userId) {
+      ElMessage.error('用户未登录')
+      orderList.value = []
+      // 跳转到登录页
+      setTimeout(() => {
+        router.push({ name: 'Auth', query: { redirect: '/orders' } })
+      }, 1000)
+      return
+    }
     const params = status ? { status } : {}
     const response = await getUserOrders(userStore.userId, params)
     orderList.value = response || []
   } catch (error) {
+    console.error('加载订单列表失败', error)
     ElMessage.error('加载订单列表失败')
+    orderList.value = []
   }
 }
 

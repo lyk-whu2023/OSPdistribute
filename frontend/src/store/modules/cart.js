@@ -28,9 +28,9 @@ export const useCartStore = defineStore('cart', {
       }
     },
 
-    async addToCart(userId, productId, skuId, quantity, price) {
+    async addToCart(userId, productId, skuId, quantity, price, productName = '') {
       try {
-        await addToCart(userId, productId, skuId, quantity, price)
+        await addToCart(userId, productId, skuId, quantity, price, productName)
         await this.loadCart(userId)
       } catch (error) {
         throw error

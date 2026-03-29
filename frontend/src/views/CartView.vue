@@ -101,9 +101,34 @@ onMounted(async () => {
 
 const loadCart = async () => {
   try {
+    // 确保 userId 存在
+    console.log('=== CartView 检查登录状态 ===')
+    console.log('userStore.userId:', userStore.userId)
+    console.log('userStore.userInfo:', userStore.userInfo)
+    console.log('userStore.token:', userStore.token)
+    
+    if (!userStore.userId) {
+      console.error('userId 为空，即将跳转到登录页')
+      ElMessage.error('用户未登录')
+      cartItems.value = []
+      // 跳转到登录页
+      setTimeout(() => {
+        router.push({ name: 'Auth', query: { redirect: '/cart' } })
+      }, 1000)
+      return
+    }
+    
+    // 调试日志
+    console.log('加载购物车 - userId:', userStore.userId)
+    console.log('当前 token:', userStore.token)
+    
     const response = await getCartItems(userStore.userId)
     cartItems.value = response || []
+    console.log('购物车数据:', cartItems.value)
   } catch (error) {
+    console.error('加载购物车错误:', error)
+    console.error('错误响应:', error.response)
+    console.error('错误状态码:', error.response?.status)
     ElMessage.error('加载购物车失败')
     cartItems.value = []
   }
@@ -163,7 +188,6 @@ const handleCheckout = () => {
         quantity: item.quantity,
         price: item.price,
         productName: item.productName,
-        skuName: item.skuName,
         image: item.image
       })))
     }

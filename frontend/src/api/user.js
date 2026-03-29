@@ -145,3 +145,15 @@ export function setDefaultAddress(userId, addressId) {
     method: 'put'
   })
 }
+
+/**
+ * 删除用户
+ * @param {number} id - 用户 ID
+ * @returns {Promise}
+ */
+export function deleteUser(id) {
+  return request({
+    url: `/api/users/${id}`,
+    method: 'delete'
+  })
+}

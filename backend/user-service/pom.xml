@@ -106,6 +106,12 @@
             <optional>true</optional>
         </dependency>
         
+        <!-- Jackson Java 8 时间模块 -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jsr310</artifactId>
+        </dependency>
+        
         <!-- javax.annotation API (Java 9+ 兼容) -->
         <dependency>
             <groupId>javax.annotation</groupId>

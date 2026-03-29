@@ -54,30 +54,26 @@ public class OrderServiceImpl implements OrderService {
         BigDecimal totalAmount = BigDecimal.ZERO;
         
         for (CartItemRequest itemRequest : items) {
-            OrderItem orderItem = new OrderItem();
-            orderItem.setProductId(itemRequest.getProductId());
-            orderItem.setSkuId(itemRequest.getSkuId());
-            orderItem.setProductName(itemRequest.getProductName());
-            orderItem.setSkuName(itemRequest.getSkuName());
-            orderItem.setPrice(itemRequest.getPrice());
-            orderItem.setQuantity(itemRequest.getQuantity());
-            orderItem.setCreateTime(LocalDateTime.now());
-            
             totalAmount = totalAmount.add(itemRequest.getPrice().multiply(new BigDecimal(itemRequest.getQuantity())));
-            
-            orderItemMapper.insert(orderItem);
-            
-            productServiceClient.updateStock(itemRequest.getProductId(), itemRequest.getQuantity());
         }
         
         order.setTotalAmount(totalAmount);
         order.setActualAmount(totalAmount);
         orderMapper.insert(order);
         
-        for (OrderItem item : orderItemMapper.selectList(new LambdaQueryWrapper<OrderItem>()
-            .eq(OrderItem::getOrderId, order.getId()))) {
-            item.setOrderId(order.getId());
-            orderItemMapper.updateById(item);
+        for (CartItemRequest itemRequest : items) {
+            OrderItem orderItem = new OrderItem();
+            orderItem.setOrderId(order.getId());
+            orderItem.setProductId(itemRequest.getProductId());
+            orderItem.setSkuId(itemRequest.getSkuId());
+            orderItem.setProductName(itemRequest.getProductName());
+            orderItem.setPrice(itemRequest.getPrice());
+            orderItem.setQuantity(itemRequest.getQuantity());
+            orderItem.setCreateTime(LocalDateTime.now());
+            
+            orderItemMapper.insert(orderItem);
+            
+            productServiceClient.updateStock(itemRequest.getProductId(), itemRequest.getQuantity());
         }
         
         Cart cart = cartMapper.selectOne(new LambdaQueryWrapper<Cart>()

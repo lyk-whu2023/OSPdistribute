@@ -16,4 +16,6 @@ public interface SeckillService {
     boolean purchaseSeckillProduct(Long seckillProductId, Long userId);
 
     SeckillProductResponse createSeckillProduct(SeckillProductRequest request);
+
+    boolean initSeckillStock();
 }

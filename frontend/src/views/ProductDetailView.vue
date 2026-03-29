@@ -78,6 +78,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useProductStore } from '@/store/modules/product'
 import { useUserStore } from '@/store/modules/user'
+import { useCartStore } from '@/store/modules/cart'
 import { generateMultipleProductImages } from '@/utils/image'
 import { ElMessage } from 'element-plus'
 
@@ -85,6 +86,7 @@ const route = useRoute()
 const router = useRouter()
 const productStore = useProductStore()
 const userStore = useUserStore()
+const cartStore = useCartStore()
 
 const quantity = ref(1)
 const product = ref({})
@@ -112,15 +114,26 @@ onMounted(async () => {
   }
 })
 
-const addToCart = () => {
+const addToCart = async () => {
   if (!userStore.isLoggedIn) {
     ElMessage.warning('请先登录')
     router.push('/auth')
     return
   }
   
-  // 这里应该调用购物车API
-  ElMessage.success('已加入购物车')
+  try {
+    await cartStore.addToCart(
+      userStore.userId,
+      product.value.id,
+      product.value.id,
+      quantity.value,
+      product.value.price,
+      product.value.name
+    )
+    ElMessage.success('已加入购物车')
+  } catch (error) {
+    ElMessage.error('加入购物车失败')
+  }
 }
 
 const buyNow = () => {
@@ -132,11 +145,12 @@ const buyNow = () => {
   
   // 跳转到订单提交页面
   router.push({
-    name: 'OrderSubmit',
+    path: '/order/submit',
     query: {
-      products: JSON.stringify([{
-        id: product.value.id,
-        name: product.value.name,
+      items: JSON.stringify([{
+        productId: product.value.id,
+        skuId: product.value.id,
+        productName: product.value.name,
         price: product.value.price,
         quantity: quantity.value,
         image: product.value.images?.[0]?.imageUrl

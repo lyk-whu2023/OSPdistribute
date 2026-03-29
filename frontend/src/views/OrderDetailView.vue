@@ -128,6 +128,7 @@ const loadOrderDetail = async () => {
     const response = await getOrder(route.params.id)
     order.value = response
   } catch (error) {
+    console.error('加载订单详情失败', error)
     ElMessage.error('加载订单详情失败')
   } finally {
     loading.value = false

@@ -5,11 +5,13 @@ import com.shopping.product.dto.response.SeckillActivityResponse;
 import com.shopping.product.dto.response.SeckillProductResponse;
 import com.shopping.product.service.SeckillService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Slf4j
 @RestController
 @RequestMapping("/seckill")
 @RequiredArgsConstructor
@@ -44,5 +46,13 @@ public class SeckillController {
     public ResponseEntity<SeckillProductResponse> createSeckillProduct(
             @RequestBody SeckillProductRequest request) {
         return ResponseEntity.ok(seckillService.createSeckillProduct(request));
+    }
+
+    @PostMapping("/admin/init-stock")
+    public ResponseEntity<Boolean> initSeckillStock() {
+        log.info("接收到初始化秒杀库存请求");
+        boolean result = seckillService.initSeckillStock();
+        log.info("初始化秒杀库存结果：{}", result);
+        return ResponseEntity.ok(result);
     }
 }

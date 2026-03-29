@@ -6,7 +6,10 @@ import com.shopping.user.mapper.UserMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Service
@@ -15,11 +18,30 @@ public class UserServiceImpl implements UserService {
     
     private final UserMapper userMapper;
     private final OperationLogService operationLogService;
+    private final RedisTemplate<String, Object> redisTemplate;
 
     @Override
     public UserResponse getUserById(Long id) {
+        String cacheKey = "user:info:" + id;
+        
+        // 尝试从缓存获取
+        UserResponse cached = (UserResponse) redisTemplate.opsForValue().get(cacheKey);
+        if (cached != null) {
+            log.info("缓存命中，返回用户信息：{}", id);
+            return cached;
+        }
+        
+        // 缓存未命中，从数据库查询
         User user = userMapper.selectById(id);
-        return convertToResponse(user);
+        UserResponse response = convertToResponse(user);
+        
+        // 缓存结果，30 分钟过期
+        if (response != null) {
+            redisTemplate.opsForValue().set(cacheKey, response, 30, TimeUnit.MINUTES);
+            log.info("用户信息已缓存：{}", id);
+        }
+        
+        return response;
     }
 
     @Override
@@ -34,6 +56,11 @@ public class UserServiceImpl implements UserService {
         
         User updated = userMapper.selectById(id);
         log.info("用户信息更新成功：{}", existing.getUsername());
+        
+        // 清除缓存
+        String cacheKey = "user:info:" + id;
+        redisTemplate.delete(cacheKey);
+        log.info("用户缓存已清除：{}", id);
         
         return convertToResponse(updated);
     }

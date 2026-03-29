@@ -17,7 +17,7 @@ public class GatewayConfig {
                 .route("product-service", r -> r.path("/api/products/**", "/api/categories/**", "/api/seckill/**", "/api/product-images/**")
                         .filters(f -> f.stripPrefix(1))
                         .uri("lb://product-service"))
-                .route("order-service", r -> r.path("/api/orders/**")
+                .route("order-service", r -> r.path("/api/orders/**", "/api/cart/**")
                         .filters(f -> f.stripPrefix(1))
                         .uri("lb://order-service"))
                 .route("payment-service", r -> r.path("/api/payments/**")

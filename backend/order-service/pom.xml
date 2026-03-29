@@ -23,6 +23,18 @@
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
         
+        <!-- 排除 Gateway 依赖，order-service 不需要 -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-gateway</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>*</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        
         <!-- Nacos 服务注册与发现 -->
         <dependency>
             <groupId>com.alibaba.cloud</groupId>

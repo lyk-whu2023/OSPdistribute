@@ -7,17 +7,17 @@ spring:
   profiles:
     active: dev
   main:
-    web-application-type: reactive
+    web-application-type: servlet
   cloud:
     nacos:
       discovery:
-        server-addr: localhost:8848
+        server-addr: 172.28.197.47:8848
         enabled: true
         heartbeat-interval: 5000
         heartbeat-timeout: 15000
         ip-delete-timeout: 30000
       config:
-        server-addr: localhost:8848
+        server-addr: 172.28.197.47:8848
         file-extension: yaml
         enabled: true
         shared-configs:
@@ -26,12 +26,12 @@ spring:
     sentinel:
       enabled: false
       transport:
-        dashboard: localhost:8080
+        dashboard: 172.28.197.47:8080
         port: 8719
       datasource:
         ds1:
           nacos:
-            server-addr: localhost:8848
+            server-addr: 172.28.197.47:8848
             dataId: ${spring.application.name}-sentinel.json
             groupId: DEFAULT_GROUP
             rule-type: flow
@@ -43,17 +43,17 @@ spring:
         vgroup-mapping:
           default_tx_group: default
         grouplist:
-          default: localhost:8091
+          default: 172.28.197.47:8091
       config:
         type: nacos
         nacos:
-          server-addr: localhost:8848
+          server-addr: 172.28.197.47:8848
           group: SEATA_GROUP
           data-id: seataServer.properties
       registry:
         type: nacos
         nacos:
-          server-addr: localhost:8848
+          server-addr: 172.28.197.47:8848
           group: SEATA_GROUP
           namespace: 
   datasource:
@@ -74,11 +74,11 @@ spring:
     time-zone: Asia/Shanghai
   data:
     redis:
-      host: localhost
+      host: 172.28.197.47
       port: 6379
       password:
       database: 0
-      timeout: 5000ms
+      timeout: 2000ms
       lettuce:
         pool:
           enabled: true
@@ -87,15 +87,22 @@ spring:
           min-idle: 0
           time-between-eviction-runs: 60000ms
   kafka:
-    bootstrap-servers: localhost:9092
+    bootstrap-servers: 172.28.197.47:9092
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      properties:
+        request.timeout.ms: 5000
+        delivery.timeout.ms: 10000
+        max.block.ms: 3000
     consumer:
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       group-id: order-service
       auto-offset-reset: latest
+      properties:
+        request.timeout.ms: 5000
+        session.timeout.ms: 10000
 
 mybatis-plus:
   mapper-locations: classpath*:/mapper/**/*.xml

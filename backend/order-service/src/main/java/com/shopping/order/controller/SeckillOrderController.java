@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
 @RestController
-@RequestMapping("/api/seckill-orders")
+@RequestMapping("/seckill-orders")
 @RequiredArgsConstructor
 public class SeckillOrderController {
     

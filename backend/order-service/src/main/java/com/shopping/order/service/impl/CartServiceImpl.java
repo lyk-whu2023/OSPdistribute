@@ -66,7 +66,7 @@ public class CartServiceImpl implements CartService {
     
     @Override
     @Transactional
-    public void addToCart(Long userId, Long productId, Long skuId, Integer quantity, String productName, String skuName, BigDecimal price) {
+    public void addToCart(Long userId, Long productId, Long skuId, Integer quantity, String productName, BigDecimal price) {
         Cart cart = getCart(userId);
         if (cart == null) {
             cart = createCart(userId);
@@ -79,6 +79,7 @@ public class CartServiceImpl implements CartService {
         
         if (existingItem != null) {
             existingItem.setQuantity(existingItem.getQuantity() + quantity);
+            existingItem.setProductName(productName);
             existingItem.setUpdateTime(LocalDateTime.now());
             cartItemMapper.updateById(existingItem);
         } else {
@@ -86,6 +87,7 @@ public class CartServiceImpl implements CartService {
             newItem.setCartId(cart.getId());
             newItem.setProductId(productId);
             newItem.setSkuId(skuId);
+            newItem.setProductName(productName);
             newItem.setQuantity(quantity);
             newItem.setPrice(price);
             newItem.setCreateTime(LocalDateTime.now());
@@ -147,6 +149,7 @@ public class CartServiceImpl implements CartService {
         response.setId(item.getId());
         response.setProductId(item.getProductId());
         response.setSkuId(item.getSkuId());
+        response.setProductName(item.getProductName());
         response.setQuantity(item.getQuantity());
         response.setPrice(item.getPrice());
         response.setSubtotal(item.getPrice().multiply(new BigDecimal(item.getQuantity())));

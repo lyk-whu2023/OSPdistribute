@@ -39,6 +39,16 @@ public class SeckillServiceImpl implements SeckillService {
     @Override
     public List<SeckillActivityResponse> getActiveActivities() {
         log.info("查询进行中的秒杀活动");
+        String cacheKey = "seckill:activities:active";
+        
+        // 尝试从缓存获取
+        List<SeckillActivityResponse> cached = (List<SeckillActivityResponse>) redisTemplate.opsForValue().get(cacheKey);
+        if (cached != null) {
+            log.info("缓存命中，返回进行中的秒杀活动");
+            return cached;
+        }
+        
+        // 缓存未命中，从数据库查询
         LocalDateTime now = LocalDateTime.now();
         List<SeckillActivityResponse> activities = seckillActivityMapper.selectList(new LambdaQueryWrapper<SeckillActivity>()
                         .eq(SeckillActivity::getStatus, 1)
@@ -47,20 +57,42 @@ public class SeckillServiceImpl implements SeckillService {
                 .stream()
                 .map(this::convertActivityToResponse)
                 .collect(Collectors.toList());
-        log.info("查询到{}个进行中的秒杀活动", activities.size());
+        
+        // 缓存结果，60 分钟过期
+        if (activities != null && !activities.isEmpty()) {
+            redisTemplate.opsForValue().set(cacheKey, activities, 60, TimeUnit.MINUTES);
+            log.info("进行中的秒杀活动已缓存，数量：{}", activities.size());
+        }
+        
         return activities;
     }
 
     @Override
     public List<SeckillProductResponse> getSeckillProductsByActivity(Long activityId) {
         log.info("查询秒杀活动商品，activityId: {}", activityId);
+        String cacheKey = "seckill:activity:" + activityId + ":products";
+        
+        // 尝试从缓存获取
+        List<SeckillProductResponse> cached = (List<SeckillProductResponse>) redisTemplate.opsForValue().get(cacheKey);
+        if (cached != null) {
+            log.info("缓存命中，返回秒杀活动商品");
+            return cached;
+        }
+        
+        // 缓存未命中，从数据库查询
         List<SeckillProductResponse> products = seckillProductMapper.selectList(new LambdaQueryWrapper<SeckillProduct>()
                         .eq(SeckillProduct::getActivityId, activityId)
                         .eq(SeckillProduct::getStatus, 1))
                 .stream()
                 .map(this::convertProductToResponse)
                 .collect(Collectors.toList());
-        log.info("查询到{}个秒杀商品", products.size());
+        
+        // 缓存结果，20 分钟过期
+        if (products != null && !products.isEmpty()) {
+            redisTemplate.opsForValue().set(cacheKey, products, 20, TimeUnit.MINUTES);
+            log.info("秒杀活动商品已缓存，数量：{}", products.size());
+        }
+        
         return products;
     }
 
@@ -136,7 +168,32 @@ public class SeckillServiceImpl implements SeckillService {
         product.setCreateTime(LocalDateTime.now());
         product.setUpdateTime(LocalDateTime.now());
         seckillProductMapper.insert(product);
+        
+        // 初始化 Redis 库存
+        String stockKey = "seckill:stock:" + product.getId();
+        redisTemplate.opsForValue().set(stockKey, product.getStock());
+        log.info("秒杀商品 Redis 库存已初始化，id: {}, stock: {}", product.getId(), product.getStock());
+        
         return convertProductToResponse(product);
+    }
+
+    @Override
+    public boolean initSeckillStock() {
+        log.info("开始初始化所有秒杀商品 Redis 库存");
+        List<SeckillProduct> products = seckillProductMapper.selectList(
+            new LambdaQueryWrapper<SeckillProduct>().eq(SeckillProduct::getStatus, 1)
+        );
+        
+        int count = 0;
+        for (SeckillProduct product : products) {
+            String stockKey = "seckill:stock:" + product.getId();
+            redisTemplate.opsForValue().set(stockKey, product.getStock());
+            count++;
+            log.info("秒杀商品库存已初始化，id: {}, stock: {}", product.getId(), product.getStock());
+        }
+        
+        log.info("共初始化{}个秒杀商品的 Redis 库存", count);
+        return count > 0;
     }
 
     private SeckillProductResponse convertProductToResponse(SeckillProduct product) {

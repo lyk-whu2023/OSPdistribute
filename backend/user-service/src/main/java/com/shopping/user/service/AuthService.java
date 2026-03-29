@@ -8,4 +8,5 @@ public interface AuthService {
     String register(RegisterRequest request);
     LoginResponse login(LoginRequest request);
     void logout(String token);
+    String generateVerifyCode(String key);
 }
