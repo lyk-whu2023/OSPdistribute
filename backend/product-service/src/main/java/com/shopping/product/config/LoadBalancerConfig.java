@@ -10,6 +10,7 @@ import org.springframework.cloud.loadbalancer.support.LoadBalancerClientFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
+import reactor.core.publisher.Flux;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -53,7 +54,7 @@ public class LoadBalancerConfig {
         
         @Override
         public Flux<List<ServiceInstance>> get() {
-            return List.of();
+            return (Flux<List<ServiceInstance>>) List.of();
         }
     }
 }
