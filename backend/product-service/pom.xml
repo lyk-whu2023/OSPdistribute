@@ -84,6 +84,13 @@
             <artifactId>commons-pool2</artifactId>
         </dependency>
 
+        <!-- Redisson 分布式锁和布隆过滤器 -->
+        <dependency>
+            <groupId>org.redisson</groupId>
+            <artifactId>redisson-spring-boot-starter</artifactId>
+            <version>3.27.0</version>
+        </dependency>
+
         <!-- Kafka -->
         <dependency>
             <groupId>org.springframework.kafka</groupId>

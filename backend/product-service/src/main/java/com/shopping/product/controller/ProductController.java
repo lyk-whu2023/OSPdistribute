@@ -22,6 +22,15 @@ public class ProductController {
         return ResponseEntity.ok(productService.getProducts(page, size));
     }
 
+    @GetMapping("/search")
+    public ResponseEntity<Page<ProductResponse>> searchProducts(
+            @RequestParam(defaultValue = "1") Integer page,
+            @RequestParam(defaultValue = "10") Integer size,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) Long categoryId) {
+        return ResponseEntity.ok(productService.getProducts(page, size, keyword, categoryId));
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<ProductResponse> getProductById(@PathVariable Long id) {
         return ResponseEntity.ok(productService.getProductById(id));
@@ -50,6 +59,14 @@ public class ProductController {
             @PathVariable Long productId,
             @PathVariable Integer quantity) {
         productService.updateStock(productId, quantity);
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/{id}/status")
+    public ResponseEntity<Void> updateProductStatus(
+            @PathVariable Long id,
+            @RequestParam Integer status) {
+        productService.updateProductStatus(id, status);
         return ResponseEntity.ok().build();
     }
 }

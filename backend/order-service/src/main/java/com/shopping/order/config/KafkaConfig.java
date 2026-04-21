@@ -61,4 +61,18 @@ public class KafkaConfig {
         factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL_IMMEDIATE);
         return factory;
     }
+    
+    /**
+     * 批量监听配置（可选）
+     * 用于处理批量消息，提高吞吐量
+     */
+    @Bean
+    public ConcurrentKafkaListenerContainerFactory<String, String> batchKafkaListenerContainerFactory() {
+        ConcurrentKafkaListenerContainerFactory<String, String> factory = 
+            new ConcurrentKafkaListenerContainerFactory<>();
+        factory.setConsumerFactory(consumerFactory());
+        factory.setBatchListener(true);
+        factory.setConcurrency(3);
+        return factory;
+    }
 }

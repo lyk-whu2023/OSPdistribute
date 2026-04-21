@@ -12,13 +12,18 @@ import com.shopping.product.mapper.SeckillProductMapper;
 import com.shopping.product.service.SeckillService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.redisson.api.RBloomFilter;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +40,13 @@ public class SeckillServiceImpl implements SeckillService {
     private final RedisTemplate<String, Object> redisTemplate;
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final ObjectMapper objectMapper;
+    private final RedissonClient redissonClient;
+    private final RBloomFilter<Long> seckillProductBloomFilter;
+
+    private static final String SECKILL_PRODUCT_CACHE_KEY = "seckill:product:";
+    private static final String SECKILL_LOCK_KEY = "seckill:lock:product:";
+    private static final long LOCK_WAIT_TIME = 3;
+    private static final long LOCK_LEASE_TIME = 10;
 
     @Override
     public List<SeckillActivityResponse> getActiveActivities() {
@@ -99,21 +111,64 @@ public class SeckillServiceImpl implements SeckillService {
     @Override
     public SeckillProductResponse getSeckillProduct(Long id) {
         log.info("查询秒杀商品详情，id: {}", id);
-        String cacheKey = "seckill:product:" + id;
-        SeckillProduct product = (SeckillProduct) redisTemplate.opsForValue().get(cacheKey);
-
-        if (product == null) {
-            log.info("缓存未命中，从数据库查询，id: {}", id);
-            product = seckillProductMapper.selectById(id);
-            if (product != null) {
-                redisTemplate.opsForValue().set(cacheKey, product, 30, TimeUnit.MINUTES);
-                log.info("秒杀商品详情已缓存，id: {}", id);
-            }
-        } else {
-            log.info("缓存命中，id: {}", id);
+        
+        if (!seckillProductBloomFilter.contains(id)) {
+            log.info("布隆过滤器拦截，秒杀商品不存在，id: {}", id);
+            return null;
         }
-
-        return convertProductToResponse(product);
+        
+        String cacheKey = SECKILL_PRODUCT_CACHE_KEY + id;
+        String lockKey = SECKILL_LOCK_KEY + id;
+        
+        Object cached = redisTemplate.opsForValue().get(cacheKey);
+        if (cached instanceof SeckillProduct) {
+            log.info("缓存命中，id: {}", id);
+            return convertProductToResponse((SeckillProduct) cached);
+        }
+        
+        RLock lock = redissonClient.getLock(lockKey);
+        
+        try {
+            boolean acquired = lock.tryLock(LOCK_WAIT_TIME, LOCK_LEASE_TIME, TimeUnit.SECONDS);
+            
+            if (acquired) {
+                try {
+                    cached = redisTemplate.opsForValue().get(cacheKey);
+                    if (cached instanceof SeckillProduct) {
+                        log.info("双重检查缓存命中，id: {}", id);
+                        return convertProductToResponse((SeckillProduct) cached);
+                    }
+                    
+                    log.info("获取分布式锁成功，查询数据库，id: {}", id);
+                    SeckillProduct product = seckillProductMapper.selectById(id);
+                    
+                    if (product != null) {
+                        redisTemplate.opsForValue().set(cacheKey, product);
+                        seckillProductBloomFilter.add(id);
+                        log.info("秒杀商品已缓存（永不过期），id: {}", id);
+                    } else {
+                        log.warn("秒杀商品不存在，id: {}", id);
+                    }
+                    
+                    return convertProductToResponse(product);
+                    
+                } finally {
+                    lock.unlock();
+                }
+            } else {
+                log.info("未获取到分布式锁，等待重试，id: {}", id);
+                try {
+                    Thread.sleep(50);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+                return getSeckillProduct(id);
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            log.error("查询秒杀商品被中断，id: {}", id);
+            throw new RuntimeException("查询被中断", e);
+        }
     }
 
     @Override
@@ -121,37 +176,78 @@ public class SeckillServiceImpl implements SeckillService {
         String stockKey = "seckill:stock:" + seckillProductId;
         String userKey = "seckill:user:" + seckillProductId + ":" + userId;
 
+        // Lua 脚本：原子性检查并扣减库存
+        // 返回值说明：-1=重复购买，0=库存不足，1=购买成功
+        String luaScript = 
+            "local userKey = KEYS[1] " +
+            "local stockKey = KEYS[2] " +
+            "local userId = ARGV[1] " +
+            " " +
+            "-- 1. 检查是否重复购买 " +
+            "if redis.call('EXISTS', userKey) == 1 then " +
+            "    return -1 " +
+            "end " +
+            " " +
+            "-- 2. 检查库存 " +
+            "local stock = tonumber(redis.call('GET', stockKey)) " +
+            "if stock == nil or stock <= 0 then " +
+            "    return 0 " +
+            "end " +
+            " " +
+            "-- 3. 扣减库存 " +
+            "redis.call('DECR', stockKey) " +
+            " " +
+            "-- 4. 标记用户已购买 " +
+            "redis.call('SET', userKey, userId, 'EX', 86400) " +
+            " " +
+            "return 1";
+
         try {
-            Boolean hasPurchased = redisTemplate.opsForValue().setIfAbsent(userKey, "1", 1, TimeUnit.DAYS);
-            if (hasPurchased == null || !hasPurchased) {
+            // 执行 Lua 脚本
+            DefaultRedisScript<Long> redisScript = new DefaultRedisScript<>(luaScript, Long.class);
+            Long result = redisTemplate.execute(
+                redisScript,
+                Arrays.asList(userKey, stockKey),
+                userId.toString()
+            );
+
+            // 根据返回值判断结果
+            if (result == -1) {
                 log.warn("用户重复购买秒杀商品，userId: {}, seckillProductId: {}", userId, seckillProductId);
                 throw new RuntimeException("每人限购一件");
             }
-
-            Long stock = redisTemplate.opsForValue().decrement(stockKey);
-            if (stock == null || stock < 0) {
-                redisTemplate.delete(userKey);
+            
+            if (result == 0) {
                 log.warn("秒杀商品库存不足，seckillProductId: {}, userId: {}", seckillProductId, userId);
                 throw new RuntimeException("库存不足");
             }
-            // 构造消息体：包含商品 ID、用户 ID、时间戳
-            Map<String, Object> orderMessage = new HashMap<>();
-            orderMessage.put("seckillProductId", seckillProductId);
-            orderMessage.put("userId", userId);
-            orderMessage.put("timestamp", LocalDateTime.now().toString());
-            // 将消息转为 JSON 字符串
-            String messageJson;
-            try {
-                messageJson = objectMapper.writeValueAsString(orderMessage);
-            } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
-                log.error("序列化秒杀订单消息失败，seckillProductId: {}, userId: {}, error: {}", seckillProductId, userId, e.getMessage(), e);
-                throw new RuntimeException("序列化消息失败", e);
+            
+            if (result == 1) {
+                // 购买成功，发送 Kafka 消息
+                Map<String, Object> orderMessage = new HashMap<>();
+                orderMessage.put("seckillProductId", seckillProductId);
+                orderMessage.put("userId", userId);
+                orderMessage.put("timestamp", LocalDateTime.now().toString());
+                
+                String messageJson;
+                try {
+                    messageJson = objectMapper.writeValueAsString(orderMessage);
+                } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
+                    log.error("序列化秒杀订单消息失败，seckillProductId: {}, userId: {}, error: {}", 
+                        seckillProductId, userId, e.getMessage(), e);
+                    throw new RuntimeException("序列化消息失败", e);
+                }
+                
+                kafkaTemplate.send("seckill-order", messageJson);
+                log.info("秒杀订单消息已发送到 Kafka，seckillProductId: {}, userId: {}", seckillProductId, userId);
+                
+                return true;
             }
-            kafkaTemplate.send("seckill-order", messageJson);
             
-            log.info("秒杀订单消息已发送到 Kafka，seckillProductId: {}, userId: {}", seckillProductId, userId);
+            // 不应该到达这里
+            log.error("未知的 Lua 脚本返回值：{}, seckillProductId: {}, userId: {}", result, seckillProductId, userId);
+            throw new RuntimeException("秒杀购买失败");
             
-            return true;
         } catch (Exception e) {
             log.error("秒杀购买失败，seckillProductId: {}, userId: {}, error: {}", seckillProductId, userId, e.getMessage(), e);
             throw e;
@@ -169,10 +265,14 @@ public class SeckillServiceImpl implements SeckillService {
         product.setUpdateTime(LocalDateTime.now());
         seckillProductMapper.insert(product);
         
-        // 初始化 Redis 库存
         String stockKey = "seckill:stock:" + product.getId();
         redisTemplate.opsForValue().set(stockKey, product.getStock());
         log.info("秒杀商品 Redis 库存已初始化，id: {}, stock: {}", product.getId(), product.getStock());
+        
+        String cacheKey = SECKILL_PRODUCT_CACHE_KEY + product.getId();
+        redisTemplate.opsForValue().set(cacheKey, product);
+        seckillProductBloomFilter.add(product.getId());
+        log.info("秒杀商品已缓存到 Redis 和布隆过滤器，id: {}", product.getId());
         
         return convertProductToResponse(product);
     }

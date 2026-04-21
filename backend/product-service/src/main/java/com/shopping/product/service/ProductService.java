@@ -8,6 +8,8 @@ public interface ProductService {
 
     Page<ProductResponse> getProducts(Integer page, Integer size);
 
+    Page<ProductResponse> getProducts(Integer page, Integer size, String keyword, Long categoryId);
+
     ProductResponse getProductById(Long id);
 
     ProductResponse createProduct(ProductRequest request);
@@ -17,4 +19,6 @@ public interface ProductService {
     void deleteProduct(Long id);
 
     void updateStock(Long productId, Integer quantity);
+
+    void updateProductStatus(Long id, Integer status);
 }

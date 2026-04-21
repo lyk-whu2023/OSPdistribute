@@ -14,6 +14,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.util.concurrent.TimeUnit;
@@ -29,11 +30,30 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Page<ProductResponse> getProducts(Integer page, Integer size) {
-        log.info("查询商品列表，page: {}, size: {}", page, size);
-        Page<Product> productPage = productMapper.selectPage(new Page<>(page, size),
-                new LambdaQueryWrapper<Product>()
-                        .eq(Product::getStatus, 1)
-                        .orderByDesc(Product::getSales));
+        return getProducts(page, size, null, null);
+    }
+
+    @Override
+    public Page<ProductResponse> getProducts(Integer page, Integer size, String keyword, Long categoryId) {
+        log.info("查询商品列表，page: {}, size: {}, keyword: {}, categoryId: {}", page, size, keyword, categoryId);
+        
+        LambdaQueryWrapper<Product> wrapper = new LambdaQueryWrapper<Product>()
+                .eq(Product::getStatus, 1);
+        
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            wrapper.and(w -> w
+                    .like(Product::getName, keyword)
+                    .or()
+                    .like(Product::getDescription, keyword));
+        }
+        
+        if (categoryId != null) {
+            wrapper.eq(Product::getCategoryId, categoryId);
+        }
+        
+        wrapper.orderByDesc(Product::getSales);
+        
+        Page<Product> productPage = productMapper.selectPage(new Page<>(page, size), wrapper);
         
         Page<ProductResponse> responsePage = new Page<>(page, size, productPage.getTotal());
         responsePage.setRecords(productPage.getRecords().stream()
@@ -128,6 +148,25 @@ public class ProductServiceImpl implements ProductService {
 
         kafkaTemplate.send("stock-update", "product:" + productId + ":" + quantity);
         log.info("库存更新成功，productId: {}, 剩余库存：{}", productId, product.getStock());
+    }
+
+    @Override
+    @Transactional
+    public void updateProductStatus(Long id, Integer status) {
+        log.info("更新商品状态，id: {}, status: {}", id, status);
+        Product product = productMapper.selectById(id);
+        if (product == null) {
+            log.warn("商品不存在，id: {}", id);
+            throw new RuntimeException("商品不存在");
+        }
+
+        product.setStatus(status);
+        product.setUpdateTime(java.time.LocalDateTime.now());
+        productMapper.updateById(product);
+
+        String cacheKey = "product:" + id;
+        redisTemplate.delete(cacheKey);
+        log.info("商品状态更新成功，id: {}, 新状态：{}, 缓存已清理", id, status);
     }
 
     private ProductResponse convertToResponse(Product product) {
