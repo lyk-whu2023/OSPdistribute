@@ -103,7 +103,7 @@ const router = createRouter({
   routes
 })
 
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
   const userStore = useUserStore()
   
   console.log('=== 路由守卫 ===')
@@ -112,6 +112,12 @@ router.beforeEach((to, from, next) => {
   console.log('userStore.isLoggedIn:', userStore.isLoggedIn)
   console.log('userStore.userId:', userStore.userId)
   console.log('userStore.token:', userStore.token ? '存在' : '不存在')
+  
+  // 如果有 token 但没有用户信息，尝试初始化
+  if (userStore.token && !userStore.userInfo) {
+    console.log('正在初始化用户信息...')
+    await userStore.initUserInfo()
+  }
   
   if (to.meta.requiresAuth && !userStore.isLoggedIn) {
     console.log('未登录，跳转到登录页')

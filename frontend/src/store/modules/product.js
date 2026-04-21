@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { getCategories, getProducts, getProduct, getSeckillActivities, getSeckillProducts } from '@/api/product'
+import { getCategories, getProducts, getProduct, getSeckillActivities, getSeckillProducts, searchProducts } from '@/api/product'
 
 export const useProductStore = defineStore('product', {
   state: () => ({
@@ -43,6 +43,17 @@ export const useProductStore = defineStore('product', {
         return response
       } catch (error) {
         console.error('加载商品失败', error)
+        throw error
+      }
+    },
+
+    async searchProducts(params = {}) {
+      try {
+        const response = await searchProducts(params)
+        this.products = response.records || response
+        return response
+      } catch (error) {
+        console.error('搜索商品失败', error)
         throw error
       }
     },

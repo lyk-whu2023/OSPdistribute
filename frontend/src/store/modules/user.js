@@ -18,14 +18,16 @@ function parseToken(token) {
   }
 }
 
-const parsedToken = parseToken(getToken())
-
 export const useUserStore = defineStore('user', {
-  state: () => ({
-    token: getToken(),
-    userInfo: null,
-    userId: parsedToken?.sub || parsedToken?.userId || null
-  }),
+  state: () => {
+    const token = getToken()
+    const parsedToken = parseToken(token)
+    return {
+      token: token,
+      userInfo: null,
+      userId: parsedToken?.sub || parsedToken?.userId || null
+    }
+  },
 
   getters: {
     isLoggedIn: (state) => !!state.token,
@@ -49,6 +51,12 @@ export const useUserStore = defineStore('user', {
           this.userInfo = response.user
           this.userId = response.user.id
           console.log('用户信息已设置:', this.userInfo)
+        } else {
+          // 如果响应中没有用户信息，从 token 中解析
+          const parsedToken = parseToken(this.token)
+          if (parsedToken) {
+            this.userId = parsedToken.sub || parsedToken.userId
+          }
         }
         
         return Promise.resolve(response)
@@ -59,18 +67,31 @@ export const useUserStore = defineStore('user', {
     },
 
     async initUserInfo() {
-      // 如果已有 token 但没有用户信息，尝试获取
-      if (this.token && !this.userId) {
+      // 页面刷新时初始化用户信息
+      const token = getToken()
+      if (token && !this.userInfo) {
         try {
-          // 从 token 中解析用户信息或调用 API 获取
-          // 这里假设 token 中包含了用户信息，或者调用后端接口获取
-          const response = await getUserInfo(this.userId)
-          if (response) {
-            this.userInfo = response
-            this.userId = response.id
+          // 先从 token 中解析用户 ID
+          const parsedToken = parseToken(token)
+          if (parsedToken) {
+            const userId = parsedToken.sub || parsedToken.userId
+            if (userId) {
+              this.userId = userId
+              // 调用后端接口获取完整用户信息
+              const response = await getUserInfo(userId)
+              if (response) {
+                this.userInfo = response
+                console.log('用户信息已恢复:', this.userInfo)
+              }
+            }
           }
         } catch (error) {
           console.error('初始化用户信息失败:', error)
+          // 如果获取用户信息失败，清除 token
+          this.token = null
+          this.userInfo = null
+          this.userId = null
+          removeToken()
         }
       }
     },

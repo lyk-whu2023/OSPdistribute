@@ -52,9 +52,12 @@ request.interceptors.response.use(
           console.error('请求头:', error.config.headers)
           console.error('响应数据:', error.response.data)
           ElMessage.error('未授权，请登录')
-          // 暂时禁用自动跳转，先调试
-          // removeToken()
-          // window.location.href = '/auth'
+          // 清除 token 并跳转到登录页
+          removeToken()
+          // 发送 token 失效事件
+          if (typeof window !== 'undefined') {
+            window.dispatchEvent(new CustomEvent('token-expired'))
+          }
           break
         case 403:
           ElMessage.error('拒绝访问')

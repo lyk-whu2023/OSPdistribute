@@ -13,9 +13,10 @@
             @node-click="handleNodeClick"
             node-key="id"
             default-expand-all
+            :expand-on-click-node="false"
           >
             <template #default="{ node, data }">
-              <span>{{ data.name }}</span>
+              <span class="category-node">{{ data.name }}</span>
             </template>
           </el-tree>
         </el-card>
@@ -23,59 +24,81 @@
 
       <!-- 右侧商品列表 -->
       <el-col :span="20">
+        <!-- 面包屑导航 -->
+        <el-card class="breadcrumb-card">
+          <el-breadcrumb separator="/">
+            <el-breadcrumb-item>首页</el-breadcrumb-item>
+            <el-breadcrumb-item>商品列表</el-breadcrumb-item>
+            <el-breadcrumb-item v-if="selectedCategoryName">{{ selectedCategoryName }}</el-breadcrumb-item>
+          </el-breadcrumb>
+        </el-card>
+
         <!-- 搜索栏 -->
         <el-card class="search-card">
-          <el-row :gutter="20">
-            <el-col :span="8">
+          <el-row :gutter="20" align="middle">
+            <el-col :span="10">
               <el-input
                 v-model="searchKeyword"
-                placeholder="搜索商品"
+                placeholder="搜索商品名称或描述"
                 clearable
-                @clear="handleSearch"
+                @keyup.enter="handleSearch"
               >
                 <template #append>
-                  <el-button :icon="Search" @click="handleSearch" />
+                  <el-button :icon="Search" @click="handleSearch">搜索</el-button>
                 </template>
               </el-input>
+            </el-col>
+            <el-col :span="4">
+              <el-button type="primary" @click="handleSearch" :loading="loading">
+                查询
+              </el-button>
+              <el-button @click="handleReset">重置</el-button>
             </el-col>
           </el-row>
         </el-card>
 
         <!-- 商品列表 -->
-        <el-row :gutter="20" class="product-grid">
-          <el-col
-            v-for="product in productList"
-            :key="product.id"
-            :xs="12"
-            :sm="8"
-            :md="6"
-            :lg="4"
-          >
-            <el-card class="product-card" shadow="hover" @click="goToDetail(product.id)">
-              <div class="product-image-wrapper">
-                <img
-                  :src="product.images?.[0]?.imageUrl || getProductImage(product.id)"
-                  class="product-image"
-                  :alt="product.name"
-                />
-              </div>
-              <div class="product-info">
-                <h3 class="product-name">{{ product.name }}</h3>
-                <p class="product-desc">{{ product.description || '暂无描述' }}</p>
-                <div class="product-price">
-                  <span class="current-price">¥{{ product.price }}</span>
+        <div v-loading="loading" class="product-list-container">
+          <el-row :gutter="20" class="product-grid">
+            <el-col
+              v-for="product in productList"
+              :key="product.id"
+              :xs="12"
+              :sm="8"
+              :md="6"
+              :lg="4"
+            >
+              <el-card class="product-card" shadow="hover" @click="goToDetail(product.id)">
+                <div class="product-image-wrapper">
+                  <img
+                    :src="getProductImageUrl(product)"
+                    class="product-image"
+                    :alt="product.name"
+                  />
                 </div>
-                <div class="product-meta">
-                  <span>销量：{{ product.sales || 0 }}</span>
-                  <span>库存：{{ product.stock || 0 }}</span>
+                <div class="product-info">
+                  <h3 class="product-name" :title="product.name">{{ product.name }}</h3>
+                  <p class="product-desc" :title="product.description">{{ product.description || '暂无描述' }}</p>
+                  <div class="product-price">
+                    <span class="current-price">¥{{ product.price }}</span>
+                  </div>
+                  <div class="product-meta">
+                    <span>销量：{{ product.sales || 0 }}</span>
+                    <span :class="{ 'out-of-stock': product.stock === 0 }">
+                      库存：{{ product.stock || 0 }}
+                    </span>
+                  </div>
                 </div>
-              </div>
-            </el-card>
-          </el-col>
-        </el-row>
+              </el-card>
+            </el-col>
+          </el-row>
+
+          <!-- 空状态 -->
+          <el-empty v-if="!loading && productList.length === 0" description="暂无商品" />
+        </div>
 
         <!-- 分页 -->
-        <div class="pagination">
+        <div class="pagination" v-if="total > 0">
           <el-pagination
             v-model:current-page="currentPage"
             v-model:page-size="pageSize"
@@ -103,11 +126,13 @@ const router = useRouter()
 const route = useRoute()
 const productStore = useProductStore()
 
+const loading = ref(false)
 const searchKeyword = ref('')
 const currentPage = ref(1)
 const pageSize = ref(12)
 const total = ref(0)
 const categoryId = ref(null)
+const selectedCategoryName = ref('')
 
 const treeProps = {
   children: 'children',
@@ -117,8 +142,11 @@ const treeProps = {
 const categoryTree = computed(() => productStore.categoryTree)
 const productList = computed(() => productStore.products)
 
-const getProductImage = (productId) => {
-  return getProductImageBySeed(productId, 400, 400)
+const getProductImageUrl = (product) => {
+  if (product.images && product.images.length > 0) {
+    return product.images[0].imageUrl
+  }
+  return getProductImageBySeed(product.id, 400, 400)
 }
 
 onMounted(async () => {
@@ -132,28 +160,50 @@ onMounted(async () => {
 })
 
 const loadProducts = async () => {
+  loading.value = true
   try {
+    const hasSearchParam = searchKeyword.value || categoryId.value
+    
     const params = {
       page: currentPage.value,
-      size: pageSize.value,
-      keyword: searchKeyword.value,
-      categoryId: categoryId.value
+      size: pageSize.value
     }
     
-    const response = await productStore.loadProducts(params)
+    let response
+    if (hasSearchParam) {
+      response = await productStore.searchProducts({
+        ...params,
+        keyword: searchKeyword.value,
+        categoryId: categoryId.value
+      })
+    } else {
+      response = await productStore.loadProducts(params)
+    }
+    
     total.value = response.total || 0
   } catch (error) {
     ElMessage.error('加载商品失败')
+  } finally {
+    loading.value = false
   }
 }
 
 const handleNodeClick = (data) => {
   categoryId.value = data.id
+  selectedCategoryName.value = data.name
   currentPage.value = 1
   loadProducts()
 }
 
 const handleSearch = () => {
+  currentPage.value = 1
+  loadProducts()
+}
+
+const handleReset = () => {
+  searchKeyword.value = ''
+  categoryId.value = null
+  selectedCategoryName.value = ''
   currentPage.value = 1
   loadProducts()
 }
@@ -186,8 +236,16 @@ watch(() => route.query.categoryId, (newVal) => {
   padding: 20px;
 }
 
+.breadcrumb-card {
+  margin-bottom: 20px;
+}
+
 .search-card {
   margin-bottom: 20px;
+}
+
+.product-list-container {
+  min-height: 400px;
 }
 
 .product-grid {
@@ -198,10 +256,12 @@ watch(() => route.query.categoryId, (newVal) => {
   margin-bottom: 20px;
   cursor: pointer;
   transition: all 0.3s;
+  height: 100%;
 }
 
 .product-card:hover {
   transform: translateY(-5px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .product-image-wrapper {
@@ -209,6 +269,7 @@ watch(() => route.query.categoryId, (newVal) => {
   height: 250px;
   overflow: hidden;
   border-radius: 4px;
+  background-color: #f5f5f5;
 }
 
 .product-image {
@@ -259,6 +320,21 @@ watch(() => route.query.categoryId, (newVal) => {
   justify-content: space-between;
   font-size: 12px;
   color: #999;
+}
+
+.out-of-stock {
+  color: #f56c6c;
+  font-weight: bold;
+}
+
+.category-node {
+  cursor: pointer;
+  padding: 2px 5px;
+  border-radius: 3px;
+}
+
+.category-node:hover {
+  background-color: #f5f7fa;
 }
 
 .pagination {

@@ -88,14 +88,35 @@ export function deleteCategory(id) {
 
 /**
  * 获取商品列表（分页）
- * @param {Object} params - 查询参数
+ * @param {Object} params - 查询参数 {page, size}
  * @returns {Promise}
  */
 export function getProducts(params) {
   return request({
     url: '/api/products',
     method: 'get',
-    params
+    params: {
+      page: params.page || 1,
+      size: params.size || 10
+    }
+  })
+}
+
+/**
+ * 搜索商品（支持关键词和分类过滤）
+ * @param {Object} params - 查询参数 {page, size, keyword, categoryId}
+ * @returns {Promise}
+ */
+export function searchProducts(params) {
+  return request({
+    url: '/api/products/search',
+    method: 'get',
+    params: {
+      page: params.page || 1,
+      size: params.size || 10,
+      keyword: params.keyword || '',
+      categoryId: params.categoryId || null
+    }
   })
 }
 
@@ -160,6 +181,20 @@ export function updateProductStock(productId, quantity) {
   return request({
     url: `/api/products/${productId}/stock/${quantity}`,
     method: 'put'
+  })
+}
+
+/**
+ * 更新商品状态（上下架）
+ * @param {number} id - 商品 ID
+ * @param {number} status - 状态 (1: 上架，0: 下架)
+ * @returns {Promise}
+ */
+export function updateProductStatus(id, status) {
+  return request({
+    url: `/api/products/${id}/status`,
+    method: 'put',
+    params: { status }
   })
 }
 

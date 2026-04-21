@@ -1,10 +1,22 @@
 <template>
-  <div class="product-detail-view">
+  <div class="product-detail-view" v-loading="loading">
+    <!-- 面包屑导航 -->
+    <el-card class="breadcrumb-card">
+      <el-breadcrumb separator="/">
+        <el-breadcrumb-item>首页</el-breadcrumb-item>
+        <el-breadcrumb-item @click="$router.push('/products')">商品列表</el-breadcrumb-item>
+        <el-breadcrumb-item>{{ product.name }}</el-breadcrumb-item>
+      </el-breadcrumb>
+    </el-card>
+
     <el-row :gutter="20">
       <!-- 左侧图片 -->
       <el-col :span="12">
         <el-card>
-          <el-carousel height="500px" v-if="product.images?.length > 0 || product.id">
+          <template #header>
+            <span>商品图片</span>
+          </template>
+          <el-carousel height="500px" v-if="displayImages.length > 0">
             <el-carousel-item v-for="image in displayImages" :key="image.id || image.imageUrl">
               <img :src="image.imageUrl" class="product-image" alt="商品图片" />
             </el-carousel-item>
@@ -18,42 +30,53 @@
       <!-- 右侧信息 -->
       <el-col :span="12">
         <el-card>
+          <template #header>
+            <span>商品信息</span>
+          </template>
           <div class="product-info">
             <h1 class="product-title">{{ product.name }}</h1>
-            <p class="product-desc">{{ product.description }}</p>
+            <p class="product-desc">{{ product.description || '暂无描述' }}</p>
             
             <div class="price-section">
               <div class="price">
                 <span class="label">价格：</span>
                 <span class="current-price">¥{{ product.price }}</span>
-                <span v-if="product.originalPrice" class="original-price">¥{{ product.originalPrice }}</span>
               </div>
             </div>
 
             <div class="stock-section">
               <span class="label">库存：</span>
-              <span class="stock">{{ product.stock }} 件</span>
+              <el-tag :type="product.stock > 0 ? 'success' : 'danger'">
+                {{ product.stock > 0 ? product.stock + ' 件' : '缺货' }}
+              </el-tag>
             </div>
 
             <div class="sales-section">
               <span class="label">销量：</span>
-              <span class="sales">{{ product.sales }} 件</span>
+              <span class="sales">{{ product.sales || 0 }} 件</span>
             </div>
 
-            <div class="category-section">
+            <div class="category-section" v-if="product.categoryName">
               <span class="label">分类：</span>
               <el-tag>{{ product.categoryName }}</el-tag>
             </div>
 
-            <div class="action-section">
-              <el-input-number v-model="quantity" :min="1" :max="product.stock" />
-              <el-button type="primary" size="large" @click="addToCart" :disabled="product.stock === 0">
+            <div class="action-section" v-if="product.stock > 0">
+              <el-input-number v-model="quantity" :min="1" :max="product.stock" size="large" />
+              <el-button type="primary" size="large" @click="addToCart">
                 加入购物车
               </el-button>
-              <el-button type="danger" size="large" @click="buyNow" :disabled="product.stock === 0">
+              <el-button type="danger" size="large" @click="buyNow">
                 立即购买
               </el-button>
             </div>
+            <el-alert
+              v-else
+              type="warning"
+              title="该商品已缺货"
+              :closable="false"
+              show-icon
+            />
           </div>
         </el-card>
       </el-col>
@@ -66,7 +89,8 @@
           <template #header>
             <span>商品详情</span>
           </template>
-          <div class="product-detail" v-html="product.detail"></div>
+          <div class="product-detail" v-if="product.detail" v-html="product.detail"></div>
+          <el-empty v-else description="暂无商品详情" />
         </el-card>
       </el-col>
     </el-row>
@@ -88,6 +112,7 @@ const productStore = useProductStore()
 const userStore = useUserStore()
 const cartStore = useCartStore()
 
+const loading = ref(false)
 const quantity = ref(1)
 const product = ref({})
 
@@ -103,6 +128,7 @@ const displayImages = computed(() => {
 })
 
 onMounted(async () => {
+  loading.value = true
   const productId = route.params.id
   if (productId) {
     try {
@@ -112,6 +138,7 @@ onMounted(async () => {
       ElMessage.error('加载商品详情失败')
     }
   }
+  loading.value = false
 })
 
 const addToCart = async () => {
@@ -163,8 +190,12 @@ const buyNow = () => {
 <style scoped>
 .product-detail-view {
   padding: 20px;
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
+}
+
+.breadcrumb-card {
+  margin-bottom: 20px;
 }
 
 .product-image {
@@ -189,6 +220,7 @@ const buyNow = () => {
   font-size: 24px;
   font-weight: bold;
   margin: 0 0 10px;
+  color: #333;
 }
 
 .product-desc {
@@ -211,16 +243,16 @@ const buyNow = () => {
   gap: 10px;
 }
 
+.label {
+  font-weight: bold;
+  color: #333;
+  width: 60px;
+}
+
 .current-price {
   font-size: 24px;
   color: #ff4d4f;
   font-weight: bold;
-}
-
-.original-price {
-  font-size: 16px;
-  color: #999;
-  text-decoration: line-through;
 }
 
 .stock-section,
@@ -230,12 +262,6 @@ const buyNow = () => {
   display: flex;
   align-items: center;
   gap: 10px;
-}
-
-.label {
-  font-weight: bold;
-  color: #333;
-  width: 60px;
 }
 
 .action-section {
@@ -252,6 +278,7 @@ const buyNow = () => {
 .product-detail {
   line-height: 1.8;
   color: #333;
+  min-height: 200px;
 }
 
 .product-detail img {

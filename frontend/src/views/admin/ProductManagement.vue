@@ -56,15 +56,22 @@
         </el-table-column>
         <el-table-column prop="stock" label="库存" width="80" />
         <el-table-column prop="sales" label="销量" width="80" />
-        <el-table-column label="状态" width="80">
+        <el-table-column label="状态" width="100">
           <template #default="{ row }">
             <el-tag :type="row.status === 1 ? 'success' : 'info'">
               {{ row.status === 1 ? '上架' : '下架' }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="250" fixed="right">
+        <el-table-column label="操作" width="350" fixed="right">
           <template #default="{ row }">
+            <el-button 
+              size="small" 
+              :type="row.status === 1 ? 'warning' : 'success'" 
+              @click="handleToggleStatus(row)"
+            >
+              {{ row.status === 1 ? '下架' : '上架' }}
+            </el-button>
             <el-button size="small" @click="showEditDialog(row)">
               编辑
             </el-button>
@@ -173,7 +180,7 @@
 import { ref, reactive, onMounted, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, Plus } from '@element-plus/icons-vue'
-import { getProducts, createProduct, updateProduct, deleteProduct } from '@/api/product'
+import { getProducts, createProduct, updateProduct, deleteProduct, updateProductStatus } from '@/api/product'
 import { getCategories } from '@/api/product'
 import { getProductImageBySeed, generateMultipleProductImages } from '@/utils/image'
 
@@ -336,6 +343,26 @@ const handleDelete = async (row) => {
   } catch (error) {
     if (error !== 'cancel') {
       ElMessage.error('删除失败')
+    }
+  }
+}
+
+const handleToggleStatus = async (row) => {
+  const newStatus = row.status === 1 ? 0 : 1
+  const action = newStatus === 1 ? '上架' : '下架'
+  
+  try {
+    await ElMessageBox.confirm(`确定要${action}该商品吗？`, '提示', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    })
+    await updateProductStatus(row.id, newStatus)
+    ElMessage.success(`${action}成功`)
+    loadProducts()
+  } catch (error) {
+    if (error !== 'cancel') {
+      ElMessage.error(`${action}失败`)
     }
   }
 }
